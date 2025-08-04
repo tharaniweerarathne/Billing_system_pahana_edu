@@ -618,7 +618,7 @@
         <h3>Add New Staff</h3>
         <div class="form-group">
             <label>Staff ID</label>
-            <input type="text" name="accountNo" value="<%= nextID %>" readonly>
+            <input type="text" name="id" value="<%= nextID %>" readonly>
 
         </div>
         <div class="form-group">

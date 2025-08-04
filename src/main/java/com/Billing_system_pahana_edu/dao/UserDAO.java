@@ -21,13 +21,14 @@ public class UserDAO {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 System.out.println("User found: " + username);
-                User u = new User();
-                u.setId(rs.getString("id"));
-                u.setUsername(username);
-                u.setPassword(password);
-                u.setRole(rs.getString("role"));
-                u.setName(rs.getString("name"));
-                return u;
+                return new User.Builder()
+                        .setId(rs.getString("id"))
+                        .setUsername(rs.getString("username"))
+                        .setPassword(rs.getString("password"))
+                        .setRole(rs.getString("role"))
+                        .setName(rs.getString("name"))
+                        .setEmail(rs.getString("email"))
+                        .build();
             } else {
                 System.out.println("No matching user");
             }
@@ -43,13 +44,14 @@ public class UserDAO {
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery("SELECT * FROM users")) {
             while (rs.next()) {
-                User u = new User();
-                u.setId(rs.getString("id"));
-                u.setName(rs.getString("name"));
-                u.setEmail(rs.getString("email"));
-                u.setUsername(rs.getString("username"));
-                u.setPassword(rs.getString("password"));
-                u.setRole(rs.getString("role"));
+                User u = new User.Builder()
+                        .setId(rs.getString("id"))
+                        .setName(rs.getString("name"))
+                        .setEmail(rs.getString("email"))
+                        .setUsername(rs.getString("username"))
+                        .setPassword(rs.getString("password"))
+                        .setRole(rs.getString("role"))
+                        .build();
                 list.add(u);
             }
         } catch (Exception e) {
@@ -73,6 +75,7 @@ public class UserDAO {
             e.printStackTrace();
         }
     }
+
     public void updateStaff(User u) {
         try (Connection conn = getConnection()) {
             String query = "UPDATE users SET name=?, email=?, username=?, password=?, role=? WHERE id=?";
@@ -147,13 +150,14 @@ public class UserDAO {
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                User u = new User();
-                u.setId(rs.getString("id"));
-                u.setName(rs.getString("name"));
-                u.setEmail(rs.getString("email"));
-                u.setUsername(rs.getString("username"));
-                u.setPassword(rs.getString("password"));
-                u.setRole(rs.getString("role"));
+                User u = new User.Builder()
+                        .setId(rs.getString("id"))
+                        .setName(rs.getString("name"))
+                        .setEmail(rs.getString("email"))
+                        .setUsername(rs.getString("username"))
+                        .setPassword(rs.getString("password"))
+                        .setRole(rs.getString("role"))
+                        .build();
                 list.add(u);
             }
         } catch (Exception e) {

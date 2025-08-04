@@ -58,22 +58,27 @@ public class StaffController extends HttpServlet {
                 return;
             }
 
-            User u = new User();
-            u.setId(id);
-            u.setName(name);
-            u.setEmail(email);
-            u.setUsername(username);
-            u.setPassword(password);
+            User u = new User.Builder()
+                    .setId(id)
+                    .setName(name)
+                    .setEmail(email)
+                    .setUsername(username)
+                    .setPassword(password)
+                    .setRole("Staff")
+                    .build();
+
             service.addStaff(u);
 
         } else if ("update".equals(action)) {
-            User u = new User();
-            u.setId(id);
-            u.setName(name);
-            u.setEmail(email);
-            u.setUsername(username);
-            u.setPassword(password);
-            u.setRole("Staff");
+            User u = new User.Builder()
+                    .setId(id)
+                    .setName(name)
+                    .setEmail(email)
+                    .setUsername(username)
+                    .setPassword(password)
+                    .setRole("Staff")
+                    .build();
+
             service.updateStaff(u);
 
         } else if ("delete".equals(action)) {

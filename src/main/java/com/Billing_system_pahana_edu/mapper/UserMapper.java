@@ -5,9 +5,9 @@ import com.Billing_system_pahana_edu.model.User;
 
 public class UserMapper {
     public static User fromDTO(UserDTO dto) {
-        User u = new User();
-        u.setUsername(dto.getUsername());
-        u.setPassword(dto.getPassword());
-        return u;
+        return new User.Builder()
+                .setUsername(dto.getUsername())
+                .setPassword(dto.getPassword())
+                .build();
     }
 }
