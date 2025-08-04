@@ -31,7 +31,8 @@
 <html>
 <head>
     <title>Title</title>
-    <style>
+
+        <style>
 
         * {
             margin: 0;
@@ -234,21 +235,23 @@
             box-shadow: 0 4px 15px rgba(93, 64, 55, 0.3);
         }
 
-        /* Enhanced main-content */
         .main-content {
-            margin-left: 280px;
-            flex: 1;
             padding: 35px 45px;
             background: linear-gradient(135deg, #f4f1eb 0%, #e8e0d1 100%);
             border: 1px solid rgba(204, 204, 204, 0.5);
             border-radius: 25px;
-            margin-top: 25px;
-            margin-bottom: 25px;
-            margin-right: 25px;
+            margin: 25px;
+            margin-left: 280px; /* Only if your sidebar width is 280px */
             box-shadow:
                     0 10px 40px rgba(0, 0, 0, 0.08),
                     0 2px 8px rgba(0, 0, 0, 0.04);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+
+            /* Add this to avoid overflow */
+            max-width: calc(100% - 300px); /* Adjust if sidebar is 280px */
+            overflow-x: auto;
+            box-sizing: border-box;
         }
 
         .page-header {
@@ -447,14 +450,14 @@
             position: relative;
         }
 
-
+        /* Hover State */
         input[name="query"]:hover {
             border-color: #a0aec0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
             transform: translateY(-1px);
         }
 
-
+        /* Focus State */
         input[name="query"]:focus {
             border-color: #667eea;
             box-shadow:
@@ -464,13 +467,13 @@
             background: #ffffff;
         }
 
-
+        /* Active State */
         input[name="query"]:active {
             transform: translateY(0);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
-
+        /* Placeholder Styling */
         input[name="query"]::placeholder {
             color: #a0aec0;
             font-weight: 300;
@@ -482,6 +485,7 @@
             opacity: 0.6;
             transform: translateX(4px);
         }
+
 
 
         div[style*="color: red"] {
@@ -506,7 +510,10 @@
 
             .main-content {
                 margin-left: 0;
+                margin-right: 0;
+                max-width: 100%;
                 padding: 20px;
+                box-sizing: border-box;
             }
 
             .add-form {
@@ -571,6 +578,7 @@
             }
         }
     </style>
+
 </head>
 <body>
 
