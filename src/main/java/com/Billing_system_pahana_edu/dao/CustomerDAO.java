@@ -97,7 +97,7 @@ public class CustomerDAO {
 
     public List<Customer> searchCustomers(String keyword) {
         List<Customer> list = new ArrayList<>();
-        String sql = "SELECT * FROM customers WHERE accountNo LIKE ? OR name LIKE ? OR address LIKE ? OR telephone LIKE ?";
+        String sql = "SELECT * FROM customers WHERE accountNo LIKE ? OR name LIKE ? OR address LIKE ? OR telephone LIKE ? OR email LIKE ?";
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             String pattern = "%" + keyword + "%";
@@ -105,6 +105,7 @@ public class CustomerDAO {
             ps.setString(2, pattern);
             ps.setString(3, pattern);
             ps.setString(4, pattern);
+            ps.setString(5, pattern);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Customer c = new Customer();

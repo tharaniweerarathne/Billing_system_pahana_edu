@@ -1,5 +1,7 @@
 package com.Billing_system_pahana_edu.controller;
 
+import com.Billing_system_pahana_edu.factory.CustomerFactory;
+import com.Billing_system_pahana_edu.factory.DefaultCustomerFactory;
 import com.Billing_system_pahana_edu.model.Customer;
 import com.Billing_system_pahana_edu.service.CustomerService;
 
@@ -14,8 +16,8 @@ import java.util.List;
 @WebServlet("/CustomerController")
 public class CustomerController extends HttpServlet {
     private final CustomerService service = new CustomerService();
+    private final CustomerFactory factory = new DefaultCustomerFactory();
 
-    // Handle search and listing customers
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         String query = req.getParameter("query");
@@ -30,33 +32,38 @@ public class CustomerController extends HttpServlet {
         req.getRequestDispatcher("customer_management.jsp").forward(req, res);
     }
 
-    // Handle add, update, delete
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         String action = req.getParameter("action");
 
         if ("add".equals(action)) {
-            Customer c = new Customer();
-            c.setAccountNo(req.getParameter("accountNo"));
-            c.setName(req.getParameter("name"));
-            c.setEmail(req.getParameter("email"));
-            c.setAddress(req.getParameter("address"));
-            c.setTelephone(req.getParameter("telephone"));
+
+            Customer c = factory.createCustomer(
+                    req.getParameter("accountNo"),
+                    req.getParameter("name"),
+                    req.getParameter("email"),
+                    req.getParameter("address"),
+                    req.getParameter("telephone")
+            );
             service.addCustomer(c);
+
         } else if ("update".equals(action)) {
-            Customer c = new Customer();
-            c.setAccountNo(req.getParameter("accountNo"));
-            c.setName(req.getParameter("name"));
-            c.setEmail(req.getParameter("email"));
-            c.setAddress(req.getParameter("address"));
-            c.setTelephone(req.getParameter("telephone"));
+
+            Customer c = factory.createCustomer(
+                    req.getParameter("accountNo"),
+                    req.getParameter("name"),
+                    req.getParameter("email"),
+                    req.getParameter("address"),
+                    req.getParameter("telephone")
+            );
             service.updateCustomer(c);
+
         } else if ("delete".equals(action)) {
             service.deleteCustomer(req.getParameter("accountNo"));
         }
 
-        // Redirect back to GET after POST
+
         res.sendRedirect("CustomerController");
     }
 }
-
