@@ -5,7 +5,7 @@ public class Item {
     private String itemName;
     private String category;
     private int price;
-    private int quantity;
+    private int unit;
 
     public String getItemId() { return itemId; }
     public void setItemId(String itemId) { this.itemId = itemId; }
@@ -19,6 +19,6 @@ public class Item {
     public int getPrice() { return price; }
     public void setPrice(int price) { this.price = price; }
 
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public int getUnit() { return unit; }
+    public void setUnit(int unit) { this.unit = unit; }
 }
