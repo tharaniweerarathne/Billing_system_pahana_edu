@@ -1,20 +1,17 @@
 package com.Billing_system_pahana_edu.dao;
 
 import com.Billing_system_pahana_edu.model.User;
+import com.Billing_system_pahana_edu.util.DBUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAO {
-    public Connection getConnection() throws Exception {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        return DriverManager.getConnection("jdbc:mysql://localhost:3306/pahanaedu_db", "root", "");
-    }
 
     public User login(String username, String password) {
         System.out.println("Trying login with username: " + username + ", password: " + password);
-        try (Connection conn = getConnection();
+        try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement("SELECT * FROM users WHERE username=? AND password=?")) {
             ps.setString(1, username.trim());
             ps.setString(2, password.trim());
@@ -40,7 +37,7 @@ public class UserDAO {
 
     public List<User> getAllStaff() {
         List<User> list = new ArrayList<>();
-        try (Connection conn = getConnection();
+        try (Connection conn = DBUtil.getConnection();
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery("SELECT * FROM users")) {
             while (rs.next()) {
@@ -61,7 +58,7 @@ public class UserDAO {
     }
 
     public void addStaff(User u) {
-        try (Connection conn = getConnection()) {
+        try (Connection conn = DBUtil.getConnection()) {
             String query = "INSERT INTO users (id, name, email, username, password, role) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setString(1, generateId(conn));
@@ -77,7 +74,7 @@ public class UserDAO {
     }
 
     public void updateStaff(User u) {
-        try (Connection conn = getConnection()) {
+        try (Connection conn = DBUtil.getConnection()) {
             String query = "UPDATE users SET name=?, email=?, username=?, password=?, role=? WHERE id=?";
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setString(1, u.getName());
@@ -93,7 +90,7 @@ public class UserDAO {
     }
 
     public void deleteStaff(String id) {
-        try (Connection conn = getConnection()) {
+        try (Connection conn = DBUtil.getConnection()) {
             PreparedStatement ps = conn.prepareStatement("DELETE FROM users WHERE id=?");
             ps.setString(1, id);
             ps.executeUpdate();
@@ -112,7 +109,7 @@ public class UserDAO {
     }
 
     public boolean isUsernameExists(String username) {
-        try (Connection conn = getConnection();
+        try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement("SELECT 1 FROM users WHERE username = ? LIMIT 1")) {
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
@@ -124,7 +121,7 @@ public class UserDAO {
     }
 
     public String getNextID() {
-        try (Connection conn = getConnection()) {
+        try (Connection conn = DBUtil.getConnection()) {
             ResultSet rs = conn.createStatement().executeQuery("SELECT id FROM users ORDER BY id DESC LIMIT 1");
             if (rs.next()) {
                 int num = Integer.parseInt(rs.getString("id").substring(1)) + 1;
@@ -140,7 +137,7 @@ public class UserDAO {
         List<User> list = new ArrayList<>();
         String sql = "SELECT * FROM users WHERE id LIKE ? OR name LIKE ? OR email LIKE ?";
 
-        try (Connection con = getConnection();
+        try (Connection con = DBUtil.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             String pattern = "%" + keyword + "%";

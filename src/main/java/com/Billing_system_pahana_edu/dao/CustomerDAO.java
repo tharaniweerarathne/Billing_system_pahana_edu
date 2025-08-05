@@ -1,19 +1,15 @@
 package com.Billing_system_pahana_edu.dao;
 
 import com.Billing_system_pahana_edu.model.Customer;
+import com.Billing_system_pahana_edu.util.DBUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CustomerDAO {
-    public Connection getConnection() throws Exception {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        return DriverManager.getConnection("jdbc:mysql://localhost:3306/pahanaedu_db", "root", "");
-    }
-
     public void addCustomer(Customer c) {
-        try (Connection conn = getConnection()) {
+        try (Connection conn = DBUtil.getConnection()) {
             String sql = "INSERT INTO customers (accountNo, name, email, address, telephone) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, generateAccountNo(conn));
@@ -29,7 +25,7 @@ public class CustomerDAO {
 
     public List<Customer> getAll() {
         List<Customer> list = new ArrayList<>();
-        try (Connection conn = getConnection();
+        try (Connection conn = DBUtil.getConnection();
              ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM customers")) {
             while (rs.next()) {
                 Customer c = new Customer();
@@ -47,7 +43,7 @@ public class CustomerDAO {
     }
 
     public void updateCustomer(Customer c) {
-        try (Connection conn = getConnection()) {
+        try (Connection conn = DBUtil.getConnection()) {
             String sql = "UPDATE customers SET name=?, email=?, address=?, telephone=? WHERE accountNo=?";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, c.getName());
@@ -62,7 +58,7 @@ public class CustomerDAO {
     }
 
     public void deleteCustomer(String accountNo) {
-        try (Connection conn = getConnection()) {
+        try (Connection conn = DBUtil.getConnection()) {
             PreparedStatement ps = conn.prepareStatement("DELETE FROM customers WHERE accountNo=?");
             ps.setString(1, accountNo);
             ps.executeUpdate();
@@ -80,9 +76,8 @@ public class CustomerDAO {
         return "C001";
     }
 
-
     public String getNextAccountNo() {
-        try (Connection conn = getConnection()) {
+        try (Connection conn = DBUtil.getConnection()) {
             ResultSet rs = conn.createStatement().executeQuery("SELECT accountNo FROM customers ORDER BY accountNo DESC LIMIT 1");
             if (rs.next()) {
                 int num = Integer.parseInt(rs.getString("accountNo").substring(1)) + 1;
@@ -94,11 +89,10 @@ public class CustomerDAO {
         return "C001";
     }
 
-
     public List<Customer> searchCustomers(String keyword) {
         List<Customer> list = new ArrayList<>();
         String sql = "SELECT * FROM customers WHERE accountNo LIKE ? OR name LIKE ? OR address LIKE ? OR telephone LIKE ? OR email LIKE ?";
-        try (Connection con = getConnection();
+        try (Connection con = DBUtil.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             String pattern = "%" + keyword + "%";
             ps.setString(1, pattern);
