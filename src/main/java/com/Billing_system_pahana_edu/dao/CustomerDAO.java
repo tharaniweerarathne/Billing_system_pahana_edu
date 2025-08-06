@@ -115,4 +115,27 @@ public class CustomerDAO {
         }
         return list;
     }
+
+    public Customer getCustomerByAccountNo(String accountNo) {
+        Customer customer = null;
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM customers WHERE accountNo = ?")) {
+
+            ps.setString(1, accountNo);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                customer = new Customer();
+                customer.setAccountNo(rs.getString("accountNo"));
+                customer.setName(rs.getString("name"));
+                customer.setEmail(rs.getString("email"));
+                customer.setAddress(rs.getString("address"));
+                customer.setTelephone(rs.getString("telephone"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return customer;
+    }
+
 }

@@ -118,4 +118,27 @@ public class ItemDAO {
         }
         return itemList;
     }
+
+    public Item getItemById(String itemId) {
+        Item item = null;
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM items WHERE itemId = ?")) {
+
+            ps.setString(1, itemId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                item = new Item();
+                item.setItemId(rs.getString("itemId"));
+                item.setItemName(rs.getString("itemName"));
+                item.setCategory(rs.getString("category"));
+                item.setPrice(rs.getInt("price"));
+                item.setUnit(rs.getInt("unit"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return item;
+    }
+
 }
