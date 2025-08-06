@@ -1,5 +1,7 @@
 package com.Billing_system_pahana_edu.controller;
 
+import com.Billing_system_pahana_edu.factory.DefaultItemFactory;
+import com.Billing_system_pahana_edu.factory.ItemFactory;
 import com.Billing_system_pahana_edu.model.Item;
 import com.Billing_system_pahana_edu.service.ItemService;
 
@@ -12,10 +14,11 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/ItemController") // Servlet mapping
+@WebServlet("/ItemController")
 public class ItemController extends HttpServlet {
 
     private final ItemService service = new ItemService();
+    private final ItemFactory factory = new DefaultItemFactory(); // Use factory
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
@@ -23,7 +26,7 @@ public class ItemController extends HttpServlet {
 
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("role") == null) {
-            res.sendRedirect("login.jsp"); // Redirect if not logged in
+            res.sendRedirect("login.jsp");
             return;
         }
 
@@ -53,21 +56,23 @@ public class ItemController extends HttpServlet {
         String action = req.getParameter("action");
 
         if ("add".equals(action)) {
-            Item item = new Item();
-            item.setItemId(req.getParameter("itemId"));
-            item.setItemName(req.getParameter("itemName"));
-            item.setCategory(req.getParameter("category"));
-            item.setPrice(Integer.parseInt(req.getParameter("price")));
-            item.setUnit(Integer.parseInt(req.getParameter("unit")));
+            Item item = factory.createItem(
+                    req.getParameter("itemId"),
+                    req.getParameter("itemName"),
+                    req.getParameter("category"),
+                    Integer.parseInt(req.getParameter("price")),
+                    Integer.parseInt(req.getParameter("unit"))
+            );
             service.addItem(item);
 
         } else if ("update".equals(action)) {
-            Item item = new Item();
-            item.setItemId(req.getParameter("itemId"));
-            item.setItemName(req.getParameter("itemName"));
-            item.setCategory(req.getParameter("category"));
-            item.setPrice(Integer.parseInt(req.getParameter("price")));
-            item.setUnit(Integer.parseInt(req.getParameter("unit")));
+            Item item = factory.createItem(
+                    req.getParameter("itemId"),
+                    req.getParameter("itemName"),
+                    req.getParameter("category"),
+                    Integer.parseInt(req.getParameter("price")),
+                    Integer.parseInt(req.getParameter("unit"))
+            );
             service.updateItem(item);
 
         } else if ("delete".equals(action)) {
