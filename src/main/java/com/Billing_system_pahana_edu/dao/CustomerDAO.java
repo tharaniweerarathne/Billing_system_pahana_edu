@@ -138,4 +138,25 @@ public class CustomerDAO {
         return customer;
     }
 
+    public List<Customer> getAllCustomers() {
+        List<Customer> customers = new ArrayList<>();
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM customers");
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Customer customer = new Customer();
+                customer.setAccountNo(rs.getString("accountNo"));
+                customer.setName(rs.getString("name"));
+                customer.setEmail(rs.getString("email"));
+                customer.setAddress(rs.getString("address"));
+                customer.setTelephone(rs.getString("telephone"));
+                customers.add(customer);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return customers;
+    }
+
 }

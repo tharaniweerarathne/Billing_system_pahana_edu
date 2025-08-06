@@ -141,4 +141,29 @@ public class ItemDAO {
         return item;
     }
 
+    public List<Item> getAllItems() {
+        List<Item> items = new ArrayList<>();
+        String sql = "SELECT * FROM items";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Item item = new Item();
+                item.setItemId(rs.getString("itemId"));
+                item.setItemName(rs.getString("itemName"));
+                item.setCategory(rs.getString("category"));
+                item.setPrice(rs.getInt("price"));
+                item.setUnit(rs.getInt("unit"));
+                items.add(item);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Consider throwing a custom exception or handling it appropriately
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return items;
+    }
 }
