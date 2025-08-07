@@ -24,6 +24,7 @@
 
 <table border="1">
     <tr>
+        <th>Bill ID</th>
         <th>Customer Name</th>
         <th>Item Bought</th>
         <th>Final Amount</th>
@@ -36,18 +37,20 @@
             for (String[] row : simpleBills) {
     %>
     <tr>
-        <td><%= row[0] %></td> <!-- customerName -->
-        <td><%= row[1] %></td> <!-- items -->
-        <td><%= row[2] %></td> <!-- finalAmount -->
-        <td><%= row[3] %></td> <!-- discount -->
-        <td><%= row[4] %></td>
+
+        <td><%= row[0] %></td> <!-- billId -->
+        <td><%= row[1] %></td> <!-- customerName -->
+        <td><%= row[2] %></td> <!-- items -->
+        <td><%= row[3] %></td> <!-- finalAmount -->
+        <td><%= row[4] %></td> <!-- discount -->
+        <td><%= row[5] %></td> <!-- billDate -->
     </tr>
     <%
         }
     } else {
     %>
     <tr>
-        <td colspan="5">Click the search Button to view the bills .</td>
+        <td colspan="6">Click the search Button to view the bills .</td>
     </tr>
     <%
         }

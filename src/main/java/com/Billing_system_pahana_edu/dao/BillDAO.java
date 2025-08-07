@@ -86,11 +86,10 @@ public class BillDAO {
             String finalAmount = String.format("%.2f", rs.getDouble("finalAmount"));
             String discount = String.format("%.2f", rs.getDouble("discount"));
 
-            // Get billDate as java.sql.Date
             java.sql.Date billDateSql = rs.getDate("billDate");
             String billDate = "";
             if (billDateSql != null) {
-                billDate = billDateSql.toString(); // format as yyyy-MM-dd, you can format it differently if needed
+                billDate = billDateSql.toString();
             }
 
             boolean found = false;
@@ -113,15 +112,14 @@ public class BillDAO {
         ps.close();
         conn.close();
 
-        // Convert to [customerName, items, finalAmount, discount, billDate]
+        // Convert to [billId, customerName, items, finalAmount, discount, billDate]
         LinkedList<String[]> finalList = new LinkedList<>();
         for (String[] row : resultList) {
-            finalList.add(new String[]{row[1], row[2], row[3], row[4], row[5]});
+            finalList.add(new String[]{row[0], row[1], row[2], row[3], row[4], row[5]});
         }
 
         return finalList;
     }
-
 
 
 }
