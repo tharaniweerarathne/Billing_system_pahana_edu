@@ -1,9 +1,6 @@
-<%@ page import="com.Billing_system_pahana_edu.dao.CustomerDAO" %>
-<%@ page import="com.Billing_system_pahana_edu.dao.ItemDAO" %>
 <%@ page import="com.Billing_system_pahana_edu.model.Customer" %>
 <%@ page import="java.util.List" %>
 <%@ page import="com.Billing_system_pahana_edu.model.Item" %>
-<%@ page import="java.util.ArrayList" %><%--
   Created by IntelliJ IDEA.
   User: Sasindi Weerarathne
   Date: 8/6/2025
@@ -12,128 +9,31 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
-  CustomerDAO customerDAO = new CustomerDAO();
-  ItemDAO itemDAO = new ItemDAO();
+  List<Customer> customers = (List<Customer>) request.getAttribute("customers");
+  List<Item> items = (List<Item>) request.getAttribute("items");
+  List<Integer> itemCurrentQtys = (List<Integer>) request.getAttribute("itemCurrentQtys");
+  List<String> billIds = (List<String>) request.getAttribute("billIds");
+  List<String> billNames = (List<String>) request.getAttribute("billNames");
+  List<String> billPrices = (List<String>) request.getAttribute("billPrices");
+  List<String> billQtys = (List<String>) request.getAttribute("billQtys");
+  String selectedCustomer = (String) request.getAttribute("selectedCustomer");
+  Double discountAmount = (Double) request.getAttribute("discountAmount");
+  Double totalAmount = (Double) request.getAttribute("totalAmount");
+  Double finalAmount = (Double) request.getAttribute("finalAmount");
+  String customerSearch = (String) request.getAttribute("customerSearch");
+  String itemSearch = (String) request.getAttribute("itemSearch");
+  String showCustomers = (String) request.getAttribute("showCustomers");
+  String showItems = (String) request.getAttribute("showItems");
+  String error = (String) request.getAttribute("error");
 
-  String customerSearch = request.getParameter("customerSearch");
-  String itemSearch = request.getParameter("itemSearch");
-  String showCustomers = request.getParameter("showCustomers");
-  String showItems = request.getParameter("showItems");
-
-  List<Customer> customers = null;
-  // Show all customers when showCustomers button is clicked
-  if ("true".equals(showCustomers)) {
-    customers = customerDAO.getAllCustomers();
-  } else if (customerSearch != null && !customerSearch.trim().isEmpty()) {
-    customers = customerDAO.searchCustomers(customerSearch);
-  }
-
-  List<Item> items = null;
-  // Show all items when showItems button is clicked
-  if ("true".equals(showItems)) {
-    items = itemDAO.getAllItems();
-  } else if (itemSearch != null && !itemSearch.trim().isEmpty()) {
-    items = itemDAO.searchItems(itemSearch);
-  }
-
-  String[] billItemIds = request.getParameterValues("billItemId");
-  String[] billItemNames = request.getParameterValues("billItemName");
-  String[] billUnitPrices = request.getParameterValues("billUnitPrice");
-  String[] billUnits = request.getParameterValues("billUnit");
-  String selectedCustomer = request.getParameter("selectedCustomer");
-
-  List<String> billIds = new ArrayList<>();
-  List<String> billNames = new ArrayList<>();
-  List<String> billPrices = new ArrayList<>();
-  List<String> billQtys = new ArrayList<>();
-
-  // Load existing bill items from parameters
-  if (billItemIds != null) {
-    for (int i = 0; i < billItemIds.length; i++) {
-      billIds.add(billItemIds[i]);
-      billNames.add(billItemNames[i]);
-      billPrices.add(billUnitPrices[i]);
-      billQtys.add(billUnits[i]);
-    }
-  }
-
-  // Handle adding new items to bill
-  String addItemId = request.getParameter("addItemId");
-  String addItemQtyStr = request.getParameter("addItemQty");
-  if (addItemId != null && addItemQtyStr != null && !addItemQtyStr.trim().isEmpty()) {
-    int addQty = 0;
-    try {
-      addQty = Integer.parseInt(addItemQtyStr.trim());
-    } catch (NumberFormatException e) {
-      addQty = 0;
-    }
-
-    if (addQty > 0) {
-      Item addItem = itemDAO.getItemById(addItemId);
-      if (addItem != null) {
-        int stockAvailable = addItem.getUnit();
-
-        // Check if item already exists in bill
-        int existingIndex = -1;
-        for (int i = 0; i < billIds.size(); i++) {
-          if (billIds.get(i).equals(addItemId)) {
-            existingIndex = i;
-            break;
-          }
-        }
-
-        if (existingIndex >= 0) {
-          // Item exists, update quantity
-          int existingQty = Integer.parseInt(billQtys.get(existingIndex));
-          int newQty = existingQty + addQty;
-
-          // Check stock availability
-          if (newQty > stockAvailable) {
-            newQty = stockAvailable;
-          }
-
-          billQtys.set(existingIndex, String.valueOf(newQty));
-        } else {
-          // New item, add to bill
-          if (addQty > stockAvailable) {
-            addQty = stockAvailable;
-          }
-
-          billIds.add(addItem.getItemId());
-          billNames.add(addItem.getItemName());
-          billPrices.add(String.valueOf(addItem.getPrice()));
-          billQtys.add(String.valueOf(addQty));
-        }
-      }
-    }
-  }
-
-  // Handle removing items from bill
-  String removeIndexStr = request.getParameter("removeIndex");
-  if (removeIndexStr != null && !removeIndexStr.trim().isEmpty()) {
-    try {
-      int removeIndex = Integer.parseInt(removeIndexStr.trim());
-      if (removeIndex >= 0 && removeIndex < billIds.size()) {
-        billIds.remove(removeIndex);
-        billNames.remove(removeIndex);
-        billPrices.remove(removeIndex);
-        billQtys.remove(removeIndex);
-      }
-    } catch (NumberFormatException e) {
-      // Invalid index, ignore
-    }
-  }
-
-  // Calculate discount
-  double discountAmount = 0.0;
-  String discountStr = request.getParameter("discount");
-  if (discountStr != null && !discountStr.trim().isEmpty()) {
-    try {
-      discountAmount = Double.parseDouble(discountStr.trim());
-    } catch (NumberFormatException e) {
-      discountAmount = 0.0;
-    }
-  }
+  // Handle null values
+  if (billIds == null) billIds = new java.util.ArrayList<>();
+  if (billNames == null) billNames = new java.util.ArrayList<>();
+  if (billPrices == null) billPrices = new java.util.ArrayList<>();
+  if (billQtys == null) billQtys = new java.util.ArrayList<>();
+  if (discountAmount == null) discountAmount = 0.0;
+  if (totalAmount == null) totalAmount = 0.0;
+  if (finalAmount == null) finalAmount = 0.0;
 %>
 <html>
   <head>
@@ -143,11 +43,17 @@
 
   <h1>Create Bill</h1>
 
+  <% if (error != null && !error.trim().isEmpty()) { %>
+  <div style="color: red; background-color: #ffebee; padding: 10px; margin: 10px 0; border: 1px solid red;">
+    <strong>Error:</strong> <%= error %>
+  </div>
+  <% } %>
+
   <div class="section">
     <h2>Search Customer</h2>
 
     <!-- Search form for specific customers -->
-    <form method="get" action="createBill.jsp">
+    <form method="get" action="bill">
       <input type="text" name="customerSearch" placeholder="Search by AccountNo, Name, Address"
              value="<%= customerSearch != null ? customerSearch : "" %>" />
 
@@ -171,7 +77,7 @@
     </form>
 
     <!-- Button to show all customers -->
-    <form method="get" action="createBill.jsp" style="display: inline; margin-left: 10px;">
+    <form method="get" action="bill" style="display: inline; margin-left: 10px;">
       <input type="hidden" name="showCustomers" value="true" />
 
       <!-- Preserve selected customer -->
@@ -203,7 +109,7 @@
         <td><%= c.getAddress() %></td>
         <td><%= c.getTelephone() %></td>
         <td>
-          <form method="get" action="createBill.jsp" style="display:inline;">
+          <form method="get" action="bill" style="display:inline;">
             <input type="hidden" name="selectedCustomer" value="<%= c.getAccountNo() %>" />
             <input type="hidden" name="discount" value="<%= discountAmount %>" />
 
@@ -232,7 +138,7 @@
     <h2>Search Items</h2>
 
     <!-- Search form for specific items -->
-    <form method="get" action="createBill.jsp">
+    <form method="get" action="bill">
       <input type="text" name="itemSearch" placeholder="Search by ItemId, Name, Category"
              value="<%= itemSearch != null ? itemSearch : "" %>" />
 
@@ -256,7 +162,7 @@
     </form>
 
     <!-- Button to show all items -->
-    <form method="get" action="createBill.jsp" style="display: inline; margin-left: 10px;">
+    <form method="get" action="bill" style="display: inline; margin-left: 10px;">
       <input type="hidden" name="showItems" value="true" />
 
       <!-- Preserve selected customer -->
@@ -281,15 +187,9 @@
     <% if (items != null && items.size() > 0) { %>
     <table border="1" style="margin-top: 10px;">
       <tr><th>Item ID</th><th>Name</th><th>Category</th><th>Price</th><th>Available</th><th>Qty to Add</th><th>Action</th></tr>
-      <% for (Item i : items) {
-        // Check current quantity in bill
-        int currentQtyInBill = 0;
-        for (int j = 0; j < billIds.size(); j++) {
-          if (billIds.get(j).equals(i.getItemId())) {
-            currentQtyInBill = Integer.parseInt(billQtys.get(j));
-            break;
-          }
-        }
+      <% for (int idx = 0; idx < items.size(); idx++) {
+        Item i = items.get(idx);
+        int currentQtyInBill = itemCurrentQtys != null && idx < itemCurrentQtys.size() ? itemCurrentQtys.get(idx) : 0;
         int maxAddable = i.getUnit() - currentQtyInBill;
       %>
       <tr>
@@ -300,7 +200,7 @@
         <td><%= i.getUnit() %> (In Bill: <%= currentQtyInBill %>)</td>
         <td>
           <% if (maxAddable > 0) { %>
-          <form method="post" action="createBill.jsp" style="display:inline;">
+          <form method="post" action="bill" style="display:inline;">
             <input type="number" name="addItemQty" min="1" max="<%= maxAddable %>" value="1" required style="width: 60px;" />
             <input type="hidden" name="addItemId" value="<%= i.getItemId() %>" />
 
@@ -332,21 +232,7 @@
 
   <div class="section total-section">
     <h2>Current Bill</h2>
-    <% if (billIds.size() > 0) {
-      double totalAmount = 0;
-
-      // Calculate subtotal
-      for (int i = 0; i < billIds.size(); i++) {
-        double price = Double.parseDouble(billPrices.get(i));
-        int qty = Integer.parseInt(billQtys.get(i));
-        double subtotal = price * qty;
-        totalAmount += subtotal;
-      }
-
-      // Calculate final amount
-      double finalAmount = totalAmount - discountAmount;
-      if (finalAmount < 0) finalAmount = 0;
-    %>
+    <% if (billIds.size() > 0) { %>
 
     <table border="1">
       <tr><th>Item ID</th><th>Name</th><th>Unit Price</th><th>Qty</th><th>Subtotal</th><th>Action</th></tr>
@@ -362,7 +248,7 @@
         <td><%= qty %></td>
         <td>Rs. <%= String.format("%.2f", subtotal) %></td>
         <td>
-          <form method="post" action="createBill.jsp" style="display:inline;">
+          <form method="post" action="bill" style="display:inline;">
             <input type="hidden" name="removeIndex" value="<%= i %>" />
 
             <!-- Preserve all other items -->
@@ -393,7 +279,7 @@
         <td colspan="4"><strong>Discount:</strong></td>
         <td colspan="2">
           <strong>- Rs. <%= String.format("%.2f", discountAmount) %></strong>
-          <form method="post" action="createBill.jsp" style="display:inline; margin-left: 10px;">
+          <form method="post" action="bill" style="display:inline; margin-left: 10px;">
             <input type="number" name="discount" step="0.01" min="0" max="<%= totalAmount %>"
                    value="<%= String.format("%.2f", discountAmount) %>"
                    style="width: 100px;" placeholder="Enter discount" />
@@ -447,5 +333,4 @@
   </div>
 
   </body>
-
 </html>
