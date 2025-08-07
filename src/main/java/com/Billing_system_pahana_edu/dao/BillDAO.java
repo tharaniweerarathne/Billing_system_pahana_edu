@@ -5,6 +5,7 @@ import com.Billing_system_pahana_edu.model.BillItem;
 import com.Billing_system_pahana_edu.util.DBUtil;
 
 import java.sql.*;
+import java.util.LinkedList;
 
 public class BillDAO {
     public int saveBill(BillDTO bill) throws SQLException, Exception {
@@ -58,4 +59,59 @@ public class BillDAO {
 
         return generatedBillId;
     }
+
+    public LinkedList<String[]> getSimpleBills(String keyword) throws Exception {
+        LinkedList<String[]> resultList = new LinkedList<>();
+        Connection conn = DBUtil.getConnection();
+
+        String sql = "SELECT b.billId, c.name AS customerName, i.itemName, b.finalAmount, b.discount " +
+                "FROM bills b " +
+                "JOIN customers c ON b.customerId = c.accountNo " +
+                "JOIN bill_items bi ON b.billId = bi.billId " +
+                "JOIN items i ON bi.itemId = i.itemId " +
+                "WHERE c.name LIKE ? OR c.accountNo LIKE ? " +
+                "ORDER BY b.billId DESC";
+
+        PreparedStatement ps = conn.prepareStatement(sql);
+        String pattern = "%" + keyword + "%";
+        ps.setString(1, pattern);
+        ps.setString(2, pattern);
+
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            String billId = rs.getString("billId");
+            String customerName = rs.getString("customerName");
+            String itemName = rs.getString("itemName");
+            String finalAmount = String.format("%.2f", rs.getDouble("finalAmount"));
+            String discount = String.format("%.2f", rs.getDouble("discount"));
+
+            boolean found = false;
+
+            for (String[] row : resultList) {
+                if (row[0].equals(billId)) {
+                    row[2] += ", " + itemName;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                resultList.add(new String[]{billId, customerName, itemName, finalAmount, discount});
+            }
+        }
+
+        rs.close();
+        ps.close();
+        conn.close();
+
+        // Convert to [customerName, items, finalAmount, discount]
+        LinkedList<String[]> finalList = new LinkedList<>();
+        for (String[] row : resultList) {
+            finalList.add(new String[]{row[1], row[2], row[3], row[4]});
+        }
+
+        return finalList;
+    }
+
 }
