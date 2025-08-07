@@ -45,7 +45,7 @@
     } else {
     %>
     <tr>
-        <td colspan="4">No bills found.</td>
+        <td colspan="4">Click the search Button to view the bills .</td>
     </tr>
     <%
         }

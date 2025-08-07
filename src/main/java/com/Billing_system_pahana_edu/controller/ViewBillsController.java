@@ -20,24 +20,24 @@ public class ViewBillsController extends HttpServlet {
             throws ServletException, IOException {
         try {
             String keyword = req.getParameter("search");
-            LinkedList<String[]> simpleBills;
+            LinkedList<String[]> viewBills;
 
             if (keyword != null && !keyword.trim().isEmpty()) {
                 List<String[]> originalList = billDAO.getSimpleBills(keyword.trim());
-                simpleBills = new LinkedList<>(originalList);
+                viewBills = new LinkedList<>(originalList);
             } else {
                 List<String[]> originalList = billDAO.getSimpleBills(""); // show all if no search
-                simpleBills = new LinkedList<>(originalList);
+                viewBills = new LinkedList<>(originalList);
             }
 
-            req.setAttribute("simpleBills", simpleBills);
+            req.setAttribute("viewBills", viewBills);
             req.setAttribute("search", keyword);
-            req.getRequestDispatcher("simpleBills.jsp").forward(req, resp);
+            req.getRequestDispatcher("ViewBill.jsp").forward(req, resp);
 
         } catch (Exception e) {
             e.printStackTrace();
             req.setAttribute("error", "Error loading bills: " + e.getMessage());
-            req.getRequestDispatcher("simpleBills.jsp").forward(req, resp);
+            req.getRequestDispatcher("ViewBill.jsp").forward(req, resp);
         }
     }
 }

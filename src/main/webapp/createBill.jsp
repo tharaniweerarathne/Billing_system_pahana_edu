@@ -1,6 +1,6 @@
 <%@ page import="com.Billing_system_pahana_edu.model.Customer" %>
 <%@ page import="java.util.List" %>
-<%@ page import="com.Billing_system_pahana_edu.model.Item" %>
+<%@ page import="com.Billing_system_pahana_edu.model.Item" %><%--
   Created by IntelliJ IDEA.
   User: Sasindi Weerarathne
   Date: 8/6/2025

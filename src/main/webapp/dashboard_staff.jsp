@@ -19,6 +19,7 @@
     <a href="customer_management.jsp">👥 View Users</a>
     <a href="item_management.jsp">🛠 Manage Item</a>
     <a href="createBill.jsp">Calculate Bills</a>
+    <a href="ViewBill.jsp">Calculate Bills</a>
     <a href="logout.jsp">🚪 Logout</a>
 </div>
 
