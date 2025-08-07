@@ -64,7 +64,7 @@ public class BillDAO {
         LinkedList<String[]> resultList = new LinkedList<>();
         Connection conn = DBUtil.getConnection();
 
-        String sql = "SELECT b.billId, c.name AS customerName, i.itemName, b.finalAmount, b.discount " +
+        String sql = "SELECT b.billId, c.name AS customerName, i.itemName, b.finalAmount, b.discount, b.billDate " +
                 "FROM bills b " +
                 "JOIN customers c ON b.customerId = c.accountNo " +
                 "JOIN bill_items bi ON b.billId = bi.billId " +
@@ -86,18 +86,26 @@ public class BillDAO {
             String finalAmount = String.format("%.2f", rs.getDouble("finalAmount"));
             String discount = String.format("%.2f", rs.getDouble("discount"));
 
+            // Get billDate as java.sql.Date
+            java.sql.Date billDateSql = rs.getDate("billDate");
+            String billDate = "";
+            if (billDateSql != null) {
+                billDate = billDateSql.toString(); // format as yyyy-MM-dd, you can format it differently if needed
+            }
+
             boolean found = false;
 
             for (String[] row : resultList) {
                 if (row[0].equals(billId)) {
-                    row[2] += ", " + itemName;
+                    row[2] += ", " + itemName;  // Append itemName
                     found = true;
                     break;
                 }
             }
 
             if (!found) {
-                resultList.add(new String[]{billId, customerName, itemName, finalAmount, discount});
+                // Add billDate as the last element
+                resultList.add(new String[]{billId, customerName, itemName, finalAmount, discount, billDate});
             }
         }
 
@@ -105,13 +113,15 @@ public class BillDAO {
         ps.close();
         conn.close();
 
-        // Convert to [customerName, items, finalAmount, discount]
+        // Convert to [customerName, items, finalAmount, discount, billDate]
         LinkedList<String[]> finalList = new LinkedList<>();
         for (String[] row : resultList) {
-            finalList.add(new String[]{row[1], row[2], row[3], row[4]});
+            finalList.add(new String[]{row[1], row[2], row[3], row[4], row[5]});
         }
 
         return finalList;
     }
+
+
 
 }

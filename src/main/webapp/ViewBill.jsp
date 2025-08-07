@@ -28,6 +28,7 @@
         <th>Item Bought</th>
         <th>Final Amount</th>
         <th>Discount</th>
+        <th>Bill Date</th>
     </tr>
     <%
         List<String[]> simpleBills = (List<String[]>) request.getAttribute("viewBills");
@@ -39,13 +40,14 @@
         <td><%= row[1] %></td> <!-- items -->
         <td><%= row[2] %></td> <!-- finalAmount -->
         <td><%= row[3] %></td> <!-- discount -->
+        <td><%= row[4] %></td>
     </tr>
     <%
         }
     } else {
     %>
     <tr>
-        <td colspan="4">Click the search Button to view the bills .</td>
+        <td colspan="5">Click the search Button to view the bills .</td>
     </tr>
     <%
         }
