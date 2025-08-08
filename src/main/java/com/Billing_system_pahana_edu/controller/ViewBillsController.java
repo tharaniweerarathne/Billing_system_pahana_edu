@@ -1,5 +1,7 @@
 package com.Billing_system_pahana_edu.controller;
 
+import com.Billing_system_pahana_edu.command.Command;
+import com.Billing_system_pahana_edu.command.ViewBillsCommand;
 import com.Billing_system_pahana_edu.dao.BillDAO;
 
 import javax.servlet.ServletException;
@@ -13,31 +15,12 @@ import java.util.List;
 
 @WebServlet("/viewBills")
 public class ViewBillsController extends HttpServlet {
+
     private final BillDAO billDAO = new BillDAO();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        try {
-            String keyword = req.getParameter("search");
-            LinkedList<String[]> viewBills;
-
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                List<String[]> originalList = billDAO.getSimpleBills(keyword.trim());
-                viewBills = new LinkedList<>(originalList);
-            } else {
-                List<String[]> originalList = billDAO.getSimpleBills(""); // show all if no search
-                viewBills = new LinkedList<>(originalList);
-            }
-
-            req.setAttribute("viewBills", viewBills);
-            req.setAttribute("search", keyword);
-            req.getRequestDispatcher("ViewBill.jsp").forward(req, resp);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            req.setAttribute("error", "Error loading bills: " + e.getMessage());
-            req.getRequestDispatcher("ViewBill.jsp").forward(req, resp);
-        }
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Command viewBillsCommand = new ViewBillsCommand(billDAO);
+        viewBillsCommand.execute(req, resp);
     }
 }

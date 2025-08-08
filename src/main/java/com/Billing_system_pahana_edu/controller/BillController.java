@@ -45,7 +45,7 @@ public class BillController extends HttpServlet {
     private void handleRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // Get parameters
+
         String customerSearch = req.getParameter("customerSearch");
         String itemSearch = req.getParameter("itemSearch");
         String showCustomers = req.getParameter("showCustomers");
@@ -56,7 +56,7 @@ public class BillController extends HttpServlet {
         String selectedCustomer = req.getParameter("selectedCustomer");
         String discountStr = req.getParameter("discount");
 
-        // Handle customer search/display
+        // customer search and display
         List<Customer> customers = null;
         if ("true".equals(showCustomers)) {
             customers = customerDAO.getAllCustomers();
@@ -64,7 +64,7 @@ public class BillController extends HttpServlet {
             customers = customerDAO.searchCustomers(customerSearch);
         }
 
-        // Handle item search/display
+        // item search and display
         List<Item> items = null;
         if ("true".equals(showItems)) {
             items = itemDAO.getAllItems();
@@ -72,7 +72,7 @@ public class BillController extends HttpServlet {
             items = itemDAO.searchItems(itemSearch);
         }
 
-        // Process existing bill items
+        // process existing bill items
         String[] billItemIds = req.getParameterValues("billItemId");
         String[] billItemNames = req.getParameterValues("billItemName");
         String[] billUnitPrices = req.getParameterValues("billUnitPrice");
@@ -83,7 +83,7 @@ public class BillController extends HttpServlet {
         List<String> billPrices = new ArrayList<>();
         List<String> billQtys = new ArrayList<>();
 
-        // Load existing bill items from parameters
+        // existing bill items from parameters
         if (billItemIds != null) {
             for (int i = 0; i < billItemIds.length; i++) {
                 billIds.add(billItemIds[i]);
@@ -93,7 +93,7 @@ public class BillController extends HttpServlet {
             }
         }
 
-        // Handle adding new items to bill
+        // adding new items to bill
         if (addItemId != null && addItemQtyStr != null && !addItemQtyStr.trim().isEmpty()) {
             int addQty = 0;
             try {
@@ -142,7 +142,7 @@ public class BillController extends HttpServlet {
             }
         }
 
-        // Handle removing items from bill
+        // removing items from bill
         if (removeIndexStr != null && !removeIndexStr.trim().isEmpty()) {
             try {
                 int removeIndex = Integer.parseInt(removeIndexStr.trim());
@@ -153,11 +153,11 @@ public class BillController extends HttpServlet {
                     billQtys.remove(removeIndex);
                 }
             } catch (NumberFormatException e) {
-                // Invalid index, ignore
+
             }
         }
 
-        // Calculate discount
+        // calculate discount
         double discountAmount = 0.0;
         if (discountStr != null && !discountStr.trim().isEmpty()) {
             try {
@@ -167,7 +167,7 @@ public class BillController extends HttpServlet {
             }
         }
 
-        // Calculate totals
+        // calculate totals
         double totalAmount = 0;
         if (billIds.size() > 0) {
             for (int i = 0; i < billIds.size(); i++) {
@@ -181,7 +181,7 @@ public class BillController extends HttpServlet {
         double finalAmount = totalAmount - discountAmount;
         if (finalAmount < 0) finalAmount = 0;
 
-        // Calculate current quantities in bill for each item (for display purposes)
+        // calculating current units in bill for each item (for display purposes)
         List<Integer> itemCurrentQtys = new ArrayList<>();
         if (items != null) {
             for (Item item : items) {
@@ -196,7 +196,7 @@ public class BillController extends HttpServlet {
             }
         }
 
-        // Set all attributes for JSP
+
         req.setAttribute("customers", customers);
         req.setAttribute("items", items);
         req.setAttribute("itemCurrentQtys", itemCurrentQtys);
@@ -219,7 +219,7 @@ public class BillController extends HttpServlet {
     private void handleConfirmBill(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
-            // Validate customer
+            // validate customer
             String customerId = req.getParameter("selectedCustomer");
             if (customerId == null || customerId.trim().isEmpty()) {
                 req.setAttribute("error", "Customer ID is missing.");
@@ -227,7 +227,7 @@ public class BillController extends HttpServlet {
                 return;
             }
 
-            // Retrieve item inputs
+            // retrieve item inputs
             String[] itemIds = req.getParameterValues("billItemId");
             String[] itemNames = req.getParameterValues("billItemName");
             String[] unitPrices = req.getParameterValues("billUnitPrice");
@@ -239,14 +239,14 @@ public class BillController extends HttpServlet {
                 return;
             }
 
-            // Parse discount
+            // discount
             double discount = 0;
             try {
                 discount = Double.parseDouble(req.getParameter("discount"));
             } catch (Exception ignored) {
             }
 
-            // Build billItem list using builder pattern
+
             List<BillItem> billItems = new ArrayList<>();
             for (int i = 0; i < itemIds.length; i++) {
                 double price = Double.parseDouble(unitPrices[i]);
@@ -269,7 +269,7 @@ public class BillController extends HttpServlet {
             billDTO.setItems(billItems);
             billDTO.setDiscount(discount);
 
-            billService.processBill(billDTO); // save + update quantities
+            billService.processBill(billDTO);
 
             Customer customer = customerDAO.getCustomerByAccountNo(customerId);
             if (customer == null) {
