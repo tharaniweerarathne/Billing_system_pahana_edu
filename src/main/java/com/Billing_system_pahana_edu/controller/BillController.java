@@ -219,7 +219,7 @@ public class BillController extends HttpServlet {
     private void handleConfirmBill(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
-            //validate customer
+            // Validate customer
             String customerId = req.getParameter("selectedCustomer");
             if (customerId == null || customerId.trim().isEmpty()) {
                 req.setAttribute("error", "Customer ID is missing.");
@@ -227,7 +227,7 @@ public class BillController extends HttpServlet {
                 return;
             }
 
-            //retrieve item inputs
+            // Retrieve item inputs
             String[] itemIds = req.getParameterValues("billItemId");
             String[] itemNames = req.getParameterValues("billItemName");
             String[] unitPrices = req.getParameterValues("billUnitPrice");
@@ -239,23 +239,28 @@ public class BillController extends HttpServlet {
                 return;
             }
 
-            //discount
+            // Parse discount
             double discount = 0;
             try {
                 discount = Double.parseDouble(req.getParameter("discount"));
             } catch (Exception ignored) {
-
             }
 
-            // billItem list
+            // Build billItem list using builder pattern
             List<BillItem> billItems = new ArrayList<>();
             for (int i = 0; i < itemIds.length; i++) {
-                BillItem item = new BillItem();
-                item.setItemId(itemIds[i]);
-                item.setItemName(itemNames[i]);
-                item.setUnitPrice(Double.parseDouble(unitPrices[i]));
-                item.setUnit(Integer.parseInt(quantities[i]));
-                item.setTotalPrice(item.getUnitPrice() * item.getUnit());
+                double price = Double.parseDouble(unitPrices[i]);
+                int qty = Integer.parseInt(quantities[i]);
+                double totalPrice = price * qty;
+
+                BillItem item = new BillItem.Builder()
+                        .setItemId(itemIds[i])
+                        .setItemName(itemNames[i])
+                        .setUnitPrice(price)
+                        .setUnit(qty)
+                        .setTotalPrice(totalPrice)
+                        .build();
+
                 billItems.add(item);
             }
 
