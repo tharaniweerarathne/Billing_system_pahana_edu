@@ -414,14 +414,14 @@ input[name="query"] {
     position: relative;
 }
 
-/* Hover State */
+
 input[name="query"]:hover {
     border-color: #a0aec0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     transform: translateY(-1px);
 }
 
-/* Focus State */
+
 input[name="query"]:focus {
     border-color: #667eea;
     box-shadow:
@@ -431,13 +431,13 @@ input[name="query"]:focus {
     background: #ffffff;
 }
 
-/* Active State */
+
 input[name="query"]:active {
     transform: translateY(0);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Placeholder Styling */
+
 input[name="query"]::placeholder {
     color: #a0aec0;
     font-weight: 300;
