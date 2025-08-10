@@ -59,7 +59,7 @@
         <h2>Manage Items</h2>
     </div>
 
-    <!-- Add New Item Form -->
+    
     <% if ("Admin".equals(role)) { %>
     <form method="post" action="ItemController" class="add-form">
         <input type="hidden" name="action" value="add">
@@ -95,7 +95,7 @@
         <a href="ItemController"><button type="button" class="btn btn-sm btn-danger"><i class="ri-refresh-line"></i> Reset</button></a>
     </form>
 
-    <!-- Item List Table -->
+
     <table border="1">
         <thead>
         <tr>

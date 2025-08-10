@@ -63,7 +63,7 @@
     <h2 class="page-header">Manage Customers</h2>
 
 
-    <!-- Add New Customer Form -->
+
     <form method="post" action="CustomerController" class="add-form">
         <input type="hidden" name="action" value="add">
         <h3>Add New Customer</h3>
