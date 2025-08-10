@@ -21,6 +21,7 @@
 <head>
     <title>Item management</title>
     <link rel="stylesheet" href="dashboard.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
 
 </head>
 <body>
@@ -32,14 +33,16 @@
     </div>
 
     <ul class="nav-menu">
-        <li><a href="#">Dashboard</a></li>
-        <li><a href="manage_item.jsp">Manage Items</a></li>
+        <li><a href="#"><i class="ri-dashboard-line"></i> Dashboard</a></li>
+
         <% if ("Admin".equals(role)) { %>
-        <li><a href="Staff_management.jsp">Staff Management</a></li>
+        <li><a href="Staff_management.jsp"><i class="ri-user-settings-line"></i> Staff Management</a></li>
         <% } %>
-        <li><a href="customer_management.jsp">Customer Management</a></li>
-        <li><a href="#">Settings</a></li>
-        <li><a href="logout.jsp">Logout</a></li>
+
+        <li><a href="customer_management.jsp"><i class="ri-user-line"></i> Customer Management</a></li>
+        <li><a href="item_management.jsp"><i class="ri-box-3-line"></i> View Items</a></li>
+        <li><a href="createBill.jsp"><i class="ri-file-list-3-line"></i>Generate Bill</a></li>
+        <li><a href="ViewBill.jsp"><i class="ri-history-line"></i> Purchase History Management</a></li>
     </ul>
 </div>
 
@@ -88,8 +91,8 @@
 
     <form method="get" action="ItemController" class="search-form">
         <input type="text" name="query" placeholder="Search by Name or Category" value="<%= query %>">
-        <button type="submit" class="btn btn-primary btn-sm">Search</button>
-        <a href="ItemController"><button type="button" class="btn btn-sm btn-danger">Reset</button></a>
+        <button type="submit" class="btn btn-primary btn-sm"><i class="ri-search-line"></i> Search</button>
+        <a href="ItemController"><button type="button" class="btn btn-sm btn-danger"><i class="ri-refresh-line"></i> Reset</button></a>
     </form>
 
     <!-- Item List Table -->
@@ -134,8 +137,8 @@
                 </td>
                 <% if ("Admin".equals(role)) { %>
                 <td class="actions">
-                    <button type="submit" name="action" value="update" class="btn btn-primary btn-sm">Update</button>
-                    <button type="submit" name="action" value="delete" onclick="return confirm('Are you sure?')" class="btn btn-sm btn-danger">Delete</button>
+                    <button type="submit" name="action" value="update" class="btn btn-primary btn-sm"><i class="ri-edit-line"></i> Update</button>
+                    <button type="submit" name="action" value="delete" onclick="return confirm('Are you sure?')" class="btn btn-sm btn-danger"><i class="ri-delete-bin-line"></i> Delete</button>
                 </td>
                 <% } %>
 

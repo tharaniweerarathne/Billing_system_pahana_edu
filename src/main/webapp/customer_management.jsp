@@ -26,6 +26,7 @@
 <head>
     <title>Customer Management</title>
     <link rel="stylesheet" href="dashboard.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
 
 </head>
 <body>
@@ -37,14 +38,16 @@
     </div>
 
     <ul class="nav-menu">
-        <li><a href="#">Dashboard</a></li>
-        <li><a href="manage_item.jsp">Manage Items</a></li>
+        <li><a href="#"><i class="ri-dashboard-line"></i> Dashboard</a></li>
+
         <% if ("Admin".equals(role)) { %>
-        <li><a href="Staff_management.jsp">Staff Management</a></li>
+        <li><a href="Staff_management.jsp"><i class="ri-user-settings-line"></i> Staff Management</a></li>
         <% } %>
-        <li><a href="customer_management.jsp">Customer Management</a></li>
-        <li><a href="#">Settings</a></li>
-        <li><a href="logout.jsp">Logout</a></li>
+
+        <li><a href="customer_management.jsp"><i class="ri-user-line"></i> Customer Management</a></li>
+        <li><a href="item_management.jsp"><i class="ri-box-3-line"></i> View Items</a></li>
+        <li><a href="createBill.jsp"><i class="ri-file-list-3-line"></i>Generate Bill</a></li>
+        <li><a href="ViewBill.jsp"><i class="ri-history-line"></i> Purchase History Management</a></li>
     </ul>
 </div>
 
@@ -93,8 +96,8 @@
 
     <form method="get" action="CustomerController" style="margin-bottom: 20px;">
         <input type="text" name="query" placeholder="Search by name, address or telephone" value="<%= searchQuery %>" style="width: 250px; padding: 5px;">
-        <button type="submit" class="btn btn-primary btn-sm">Search</button>
-        <a href="CustomerController"><button type="button" class="btn btn-sm btn-danger">Reset</button></a>
+        <button type="submit" class="btn btn-primary btn-sm"><i class="ri-search-line"></i> Search</button>
+        <a href="CustomerController"><button type="button" class="btn btn-sm btn-danger"> <i class="ri-refresh-line"></i> Reset</button></a>
     </form>
 
 
@@ -122,8 +125,8 @@
                 <td><input type="text" name="address" value="<%= c.getAddress() %>" required></td>
                 <td><input type="tel" name="telephone" value="<%= c.getTelephone() %>" required></td>
                 <td class="actions">
-                    <button type="submit" name="action" value="update" class="btn btn-primary btn-sm">Update</button>
-                    <button type="submit" name="action" value="delete" onclick="return confirm('Are you sure?')" class="btn btn-sm btn-danger">Delete</button>
+                    <button type="submit" name="action" value="update" class="btn btn-primary btn-sm"><i class="ri-edit-line"></i> Update</button>
+                    <button type="submit" name="action" value="delete" onclick="return confirm('Are you sure?')" class="btn btn-sm btn-danger"><i class="ri-delete-bin-line"></i> Delete</button>
                 </td>
             </form>
         </tr>
