@@ -31,7 +31,7 @@
 <html>
 <head>
     <title>Staff management</title>
-    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="css/dashboard.css">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
 
 </head>
@@ -40,7 +40,7 @@
 
 <div class="sidebar">
     <div class="logo-container">
-        <div class="logo"> <img src="images/logo.png" alt="Pahana Edu Logo" class="logo"></div>
+        <div class="logo"> <img src="images/logo1.png" alt="Pahana Edu Logo" class="logo"></div>
     </div>
 
     <ul class="nav-menu">

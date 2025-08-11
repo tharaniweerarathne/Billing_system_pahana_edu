@@ -49,7 +49,7 @@ public class LoginController extends HttpServlet {
                 request.getRequestDispatcher("login.jsp").forward(request, response);
             }
         } catch (Exception e) {
-            e.printStackTrace(); // Check console for errors
+            e.printStackTrace();
             response.sendRedirect("login.jsp");
         }
     }
@@ -57,7 +57,7 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // If someone tries to visit /login directly, show the login page
+
         response.sendRedirect("login.jsp");
     }
 
