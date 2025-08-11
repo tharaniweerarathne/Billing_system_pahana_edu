@@ -64,7 +64,7 @@
             <span class="user-name">
               Welcome, <%= session.getAttribute("name") != null ? session.getAttribute("name") : "Admin" %>
             </span>
-            <a href="login.jsp" class="logout-btn">Logout</a>
+            <a href="login.jsp" class="logout-btn" onclick="return confirm('Are you sure you want to log out?')">Logout</a>
         </div>
     </div>
     <h2 class="page-header">Manage Staff</h2>
@@ -139,7 +139,7 @@
                 <td><input type="text" name="username" value="<%= user.getUsername() %>" required></td>
                 <td><input type="text" name="password" value="<%= user.getPassword() %>" required></td>
                 <td class="actions">
-                    <button type="submit" name="action" value="update" class="btn btn-primary btn-sm"><i class="ri-edit-line"></i> Update</button>
+                    <button type="submit" name="action" value="update" class="btn btn-primary btn-sm" onclick="alert('Staff information updated successfully')"><i class="ri-edit-line"></i> Update</button>
                     <button type="submit" name="action" value="delete" onclick="return confirm('Are you sure?')" class="btn btn-sm btn-danger"><i class="ri-delete-bin-line"></i> Delete</button>
                 </td>
             </form>

@@ -11,7 +11,7 @@
 %>
 <html>
 <head>
-    <title>Title</title>
+    <title>Admin Dashboard</title>
 
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
   <style>
@@ -527,7 +527,7 @@
         <span class="user-name">
           Welcome, <%= session.getAttribute("name") != null ? session.getAttribute("name") : "Staff" %>
         </span>
-        <a href="login.jsp" class="logout-btn">Logout</a>
+        <a href="login.jsp" class="logout-btn" onclick="return confirm('Are you sure you want to log out?')">Logout</a>
       </div>
     </div>
 
