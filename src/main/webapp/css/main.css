@@ -74,7 +74,7 @@ body {
     color: #bcaaa4;
     text-decoration: none;
     padding: 15px 25px;
-    font-size: 18px;
+    font-size: 15px;
     font-weight: bold;
     transition: all 0.3s ease;
     border-left: 4px solid transparent;
@@ -221,10 +221,10 @@ body {
 .main-content::before {
     content: '';
     position: absolute;
+    background: url('../images/background1.jpg') no-repeat center center/cover;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: url('images/background1.jpg') no-repeat center center;
     background-size: cover;
-    background-attachment: scroll;  /* this makes it scroll normally */
+    background-attachment: scroll;
     filter: blur(12px);
     opacity: 0.25;
     z-index: -1;

@@ -1,6 +1,7 @@
 package com.Billing_system_pahana_edu.command;
 
 import com.Billing_system_pahana_edu.dao.BillDAO;
+import com.Billing_system_pahana_edu.service.BillService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -9,26 +10,18 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ViewBillsCommand implements Command{
-    private final BillDAO billDAO;
+public class ViewBillsCommand implements Command {
+    private final BillService billService;
 
-    public ViewBillsCommand(BillDAO billDAO) {
-        this.billDAO = billDAO;
+    public ViewBillsCommand(BillService billService) {
+        this.billService = billService;
     }
 
     @Override
     public void execute(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             String keyword = req.getParameter("search");
-            LinkedList<String[]> viewBills;
-
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                List<String[]> originalList = billDAO.getSimpleBills(keyword.trim());
-                viewBills = new LinkedList<>(originalList);
-            } else {
-                List<String[]> originalList = billDAO.getSimpleBills("");
-                viewBills = new LinkedList<>(originalList);
-            }
+            List<String[]> viewBills = billService.getSimpleBills(keyword);
 
             req.setAttribute("viewBills", viewBills);
             req.setAttribute("search", keyword);

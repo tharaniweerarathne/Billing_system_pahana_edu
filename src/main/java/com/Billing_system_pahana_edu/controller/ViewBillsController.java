@@ -3,6 +3,7 @@ package com.Billing_system_pahana_edu.controller;
 import com.Billing_system_pahana_edu.command.Command;
 import com.Billing_system_pahana_edu.command.ViewBillsCommand;
 import com.Billing_system_pahana_edu.dao.BillDAO;
+import com.Billing_system_pahana_edu.service.BillService;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -16,11 +17,11 @@ import java.util.List;
 @WebServlet("/viewBills")
 public class ViewBillsController extends HttpServlet {
 
-    private final BillDAO billDAO = new BillDAO();
+    private final BillService billService = new BillService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Command viewBillsCommand = new ViewBillsCommand(billDAO);
+        Command viewBillsCommand = new ViewBillsCommand(billService);
         viewBillsCommand.execute(req, resp);
     }
 }

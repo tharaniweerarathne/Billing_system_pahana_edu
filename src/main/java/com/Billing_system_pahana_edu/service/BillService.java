@@ -33,5 +33,9 @@ public class BillService {
 
         billDAO.saveBill(bill);
     }
+
+    public List<String[]> getSimpleBills(String keyword) throws Exception {
+        return billDAO.getSimpleBills(keyword != null ? keyword.trim() : "");
+    }
 }
 

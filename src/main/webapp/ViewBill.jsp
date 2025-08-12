@@ -33,6 +33,7 @@
         <table>
             <tr>
                 <th>Bill ID</th>
+                <th>Account No</th>
                 <th>Customer Name</th>
                 <th>Item Bought</th>
                 <th>Final Amount</th>
@@ -46,18 +47,19 @@
             %>
             <tr>
                 <td><%= row[0] %></td> <!-- billId -->
-                <td><%= row[1] %></td> <!-- customerName -->
-                <td><%= row[2] %></td> <!-- items -->
-                <td><%= row[3] %></td> <!-- finalAmount -->
-                <td><%= row[4] %></td> <!-- discount -->
-                <td><%= row[5] %></td> <!-- billDate -->
+                <td><%= row[1] %></td> <!-- accountNo -->
+                <td><%= row[2] %></td> <!-- customerName -->
+                <td><%= row[3] %></td> <!-- items -->
+                <td><%= row[4] %></td> <!-- finalAmount -->
+                <td><%= row[5] %></td> <!-- discount -->
+                <td><%= row[6] %></td> <!-- billDate -->
             </tr>
             <%
                 }
             } else {
             %>
             <tr>
-                <td colspan="6" class="no-data">Click the search button to view the bills.</td>
+                <td colspan="6" class="no-data">Click the search button to view all the purchase history.</td>
             </tr>
             <%
                 }

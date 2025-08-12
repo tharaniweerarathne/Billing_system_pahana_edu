@@ -64,7 +64,7 @@ public class BillDAO {
         LinkedList<String[]> resultList = new LinkedList<>();
         Connection conn = DBUtil.getConnection();
 
-        String sql = "SELECT b.billId, c.name AS customerName, i.itemName, b.finalAmount, b.discount, b.billDate " +
+        String sql = "SELECT b.billId, c.accountNo, c.name AS customerName, i.itemName, b.finalAmount, b.discount, b.billDate " +
                 "FROM bills b " +
                 "JOIN customers c ON b.customerId = c.accountNo " +
                 "JOIN bill_items bi ON b.billId = bi.billId " +
@@ -81,30 +81,28 @@ public class BillDAO {
 
         while (rs.next()) {
             String billId = rs.getString("billId");
+            String accountNo = rs.getString("accountNo");
             String customerName = rs.getString("customerName");
             String itemName = rs.getString("itemName");
             String finalAmount = String.format("%.2f", rs.getDouble("finalAmount"));
             String discount = String.format("%.2f", rs.getDouble("discount"));
 
             java.sql.Date billDateSql = rs.getDate("billDate");
-            String billDate = "";
-            if (billDateSql != null) {
-                billDate = billDateSql.toString();
-            }
+            String billDate = (billDateSql != null) ? billDateSql.toString() : "";
 
             boolean found = false;
 
             for (String[] row : resultList) {
                 if (row[0].equals(billId)) {
-                    row[2] += ", " + itemName;  // Append itemName
+                    row[3] += ", " + itemName; // Append to "Item Bought"
                     found = true;
                     break;
                 }
             }
 
             if (!found) {
-                // Add billDate as the last element
-                resultList.add(new String[]{billId, customerName, itemName, finalAmount, discount, billDate});
+                // Now order is: billId, accountNo, customerName, itemName(s), finalAmount, discount, billDate
+                resultList.add(new String[]{billId, accountNo, customerName, itemName, finalAmount, discount, billDate});
             }
         }
 
@@ -112,14 +110,9 @@ public class BillDAO {
         ps.close();
         conn.close();
 
-        // Convert to [billId, customerName, items, finalAmount, discount, billDate]
-        LinkedList<String[]> finalList = new LinkedList<>();
-        for (String[] row : resultList) {
-            finalList.add(new String[]{row[0], row[1], row[2], row[3], row[4], row[5]});
-        }
-
-        return finalList;
+        return resultList;
     }
+
 
 
 }

@@ -46,7 +46,7 @@ body::before {
     overflow: hidden;
 }
 
-/* Modern gradient border */
+
 .container::before {
     content: '';
     position: absolute;

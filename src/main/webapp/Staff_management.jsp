@@ -44,7 +44,11 @@
     </div>
 
     <ul class="nav-menu">
-        <li><a href="#"><i class="ri-dashboard-line"></i> Dashboard</a></li>
+        <% if ("Admin".equals(role)) { %>
+        <li><a href="dashboard_admin.jsp"><i class="ri-dashboard-line"></i> Dashboard</a></li>
+        <% } else { %>
+        <li><a href="dashboard_staff.jsp"><i class="ri-dashboard-line"></i> Dashboard</a></li>
+        <% } %>
 
         <% if ("Admin".equals(role)) { %>
         <li><a href="Staff_management.jsp"><i class="ri-user-settings-line"></i> Staff Management</a></li>
