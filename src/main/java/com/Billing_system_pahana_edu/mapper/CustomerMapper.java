@@ -13,7 +13,7 @@ public class CustomerMapper {
         return customer;
     }
 
-    // Convert from Model to DTO
+
     public static CustomerDTO toDTO(Customer customer) {
         CustomerDTO dto = new CustomerDTO();
         dto.setName(customer.getName());
