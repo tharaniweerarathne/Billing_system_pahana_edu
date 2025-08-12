@@ -7,7 +7,7 @@ body {
     font-size: clamp(12px, 2.5vw, 14px);
 }
 
-/* Logo styling */
+
 .logo-container {
     text-align: center;
     margin: 10px 0 15px 0;
@@ -69,7 +69,7 @@ h2 {
     border: 2px solid rgba(139, 92, 46, 0.5);
 }
 
-/* Forms and inputs - Mobile optimized */
+
 input[type="text"], input[type="number"] {
     padding: clamp(6px, 2vw, 8px) clamp(8px, 2.5vw, 10px);
     border: 1px solid #ddd;
@@ -138,7 +138,7 @@ button[name="action"][value="confirmBill"] {
     transform: translateY(-1px);
 }
 
-/* Tables - Mobile responsive */
+
 .table-container {
     overflow-x: auto;
     margin-top: 10px;
@@ -179,7 +179,7 @@ tr:hover {
     background-color: #e8f4f8;
 }
 
-/* Error styling */
+
 div[style*="color: red"] {
     background: #ffebee !important;
     border: 1px solid #f44336 !important;
@@ -191,7 +191,7 @@ div[style*="color: red"] {
     word-wrap: break-word;
 }
 
-/* Selected customer highlight */
+
 p strong {
     color: #2e7d32;
     background: rgba(76, 175, 80, 0.1);
@@ -200,13 +200,13 @@ p strong {
     word-break: break-word;
 }
 
-/* Compact form layouts */
+
 form {
     display: inline-block;
     margin: 2px;
 }
 
-/* Total rows styling */
+
 tr[style*="background-color: #e9ecef"] {
     background-color: rgba(139, 92, 46, 0.1) !important;
     font-weight: bold;
@@ -217,7 +217,7 @@ tr[style*="background-color: #d4edda"] {
     font-weight: bold;
 }
 
-/* Responsive form containers */
+
 .form-group {
     display: flex;
     flex-wrap: wrap;
@@ -231,7 +231,7 @@ tr[style*="background-color: #d4edda"] {
     margin-right: 0;
 }
 
-/* Mobile-specific responsive adjustments */
+
 @media (max-width: 480px) {
     body {
         padding: 5px;
@@ -282,7 +282,7 @@ tr[style*="background-color: #d4edda"] {
         font-size: 9px;
     }
 
-    /* Stack form elements on very small screens */
+
     .form-group {
         flex-direction: column;
         align-items: stretch;
@@ -316,7 +316,7 @@ tr[style*="background-color: #d4edda"] {
         padding: 4px 6px;
     }
 
-    /* Better button spacing on tablets */
+
     button {
         margin: 3px;
         padding: 7px 12px;

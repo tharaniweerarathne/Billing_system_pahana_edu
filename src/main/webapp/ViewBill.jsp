@@ -8,54 +8,63 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Title</title>
+    <title>Purchase History</title>
+    <link rel="stylesheet" href="css/view_bill.css">
+
 </head>
 <body>
+<div class="container">
+    <div class="header">
+        <div class="logo"><img src="images/logo1.png" alt="Pahana Edu Logo" class="logo"></div>
+        <h2>Customer Purchase Summary</h2>
+    </div>
 
-<h2>Customer Purchase Summary</h2>
+    <div class="search-section">
+        <form method="get" action="viewBills">
+            <input type="text" name="search" placeholder="Search by customer name or ID"
+                   value="<%= request.getAttribute("search") != null ? request.getAttribute("search") : "" %>">
+            <button type="submit">Search</button>
+        </form>
+    </div>
 
-<form method="get" action="viewBills">
-    <input type="text" name="search" placeholder="Search by customer name or ID"
-           value="<%= request.getAttribute("search") != null ? request.getAttribute("search") : "" %>">
-    <button type="submit">Search</button>
-</form>
+    <hr>
 
-<hr>
-
-<table border="1">
-    <tr>
-        <th>Bill ID</th>
-        <th>Customer Name</th>
-        <th>Item Bought</th>
-        <th>Final Amount</th>
-        <th>Discount</th>
-        <th>Bill Date</th>
-    </tr>
-    <%
-        List<String[]> simpleBills = (List<String[]>) request.getAttribute("viewBills");
-        if (simpleBills != null) {
-            for (String[] row : simpleBills) {
-    %>
-    <tr>
-
-        <td><%= row[0] %></td> <!-- billId -->
-        <td><%= row[1] %></td> <!-- customerName -->
-        <td><%= row[2] %></td> <!-- items -->
-        <td><%= row[3] %></td> <!-- finalAmount -->
-        <td><%= row[4] %></td> <!-- discount -->
-        <td><%= row[5] %></td> <!-- billDate -->
-    </tr>
-    <%
-        }
-    } else {
-    %>
-    <tr>
-        <td colspan="6">Click the search Button to view the bills .</td>
-    </tr>
-    <%
-        }
-    %>
-</table>
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>Bill ID</th>
+                <th>Customer Name</th>
+                <th>Item Bought</th>
+                <th>Final Amount</th>
+                <th>Discount</th>
+                <th>Bill Date</th>
+            </tr>
+            <%
+                List<String[]> simpleBills = (List<String[]>) request.getAttribute("viewBills");
+                if (simpleBills != null) {
+                    for (String[] row : simpleBills) {
+            %>
+            <tr>
+                <td><%= row[0] %></td> <!-- billId -->
+                <td><%= row[1] %></td> <!-- customerName -->
+                <td><%= row[2] %></td> <!-- items -->
+                <td><%= row[3] %></td> <!-- finalAmount -->
+                <td><%= row[4] %></td> <!-- discount -->
+                <td><%= row[5] %></td> <!-- billDate -->
+            </tr>
+            <%
+                }
+            } else {
+            %>
+            <tr>
+                <td colspan="6" class="no-data">Click the search button to view the bills.</td>
+            </tr>
+            <%
+                }
+            %>
+        </table>
+    </div>
+</div>
 
 </body>
 </html>
