@@ -37,7 +37,7 @@
     <li><a href="customer_management.jsp"><i class="ri-user-line"></i> Customer Management</a></li>
     <li><a href="item_management.jsp"><i class="ri-box-3-line"></i> View Items</a></li>
     <li><a href="createBill.jsp"><i class="ri-file-list-3-line"></i>Generate Bill</a></li>
-    <li><a href="ViewBill.jsp"><i class="ri-history-line"></i> Purchase History Management</a></li>
+    <li><a href="ViewBill.jsp"><i class="ri-history-line"></i> Purchase History </a></li>
     <li><a href="help_section.jsp"><i class="ri-question-line"></i> Help</a></li>
 
   </ul>
