@@ -46,13 +46,13 @@
                     for (String[] row : simpleBills) {
             %>
             <tr>
-                <td><%= row[0] %></td> <!-- billId -->
-                <td><%= row[1] %></td> <!-- accountNo -->
-                <td><%= row[2] %></td> <!-- customerName -->
-                <td><%= row[3] %></td> <!-- items -->
-                <td><%= row[4] %></td> <!-- finalAmount -->
-                <td><%= row[5] %></td> <!-- discount -->
-                <td><%= row[6] %></td> <!-- billDate -->
+                <td><%= row[0] %></td>
+                <td><%= row[1] %></td>
+                <td><%= row[2] %></td>
+                <td><%= row[3] %></td>
+                <td><%= row[4] %></td>
+                <td><%= row[5] %></td>
+                <td><%= row[6] %></td>
             </tr>
             <%
                 }

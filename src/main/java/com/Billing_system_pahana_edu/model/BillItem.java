@@ -7,7 +7,7 @@ public final class BillItem {
     private final int unit;
     private final double totalPrice;
 
-    // Private constructor to enforce use of Builder
+
     private BillItem(Builder builder) {
         this.itemId = builder.itemId;
         this.itemName = builder.itemName;
@@ -16,7 +16,7 @@ public final class BillItem {
         this.totalPrice = builder.totalPrice;
     }
 
-    // Getters only (immutable)
+
     public String getItemId() {
         return itemId;
     }
@@ -37,7 +37,7 @@ public final class BillItem {
         return totalPrice;
     }
 
-    // Builder class
+
     public static class Builder {
         private String itemId;
         private String itemName;

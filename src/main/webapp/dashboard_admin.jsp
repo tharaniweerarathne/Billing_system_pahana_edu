@@ -17,6 +17,7 @@
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
 
 </head>
+
 <body>
 
 <div class="sidebar">
@@ -79,19 +80,19 @@
       <a href="item_management.jsp" class="feature-btn">
         <i class="ri-box-3-line"></i>
         <h3>Inventory Management</h3>
-        <p>View and manage your educational items and stock levels</p>
+        <p>View and manage your inventory and stock levels</p>
       </a>
 
       <a href="createBill.jsp" class="feature-btn">
         <i class="ri-file-list-3-line"></i>
         <h3>Generate Bill</h3>
-        <p>Create new bills and process customer transactions</p>
+        <p>Create new bills </p>
       </a>
 
       <a href="ViewBill.jsp" class="feature-btn">
         <i class="ri-history-line"></i>
         <h3>Purchase History</h3>
-        <p>View and manage all transaction records and history</p>
+        <p>View all transaction records and history</p>
       </a>
 
 
@@ -106,6 +107,6 @@
   </div>
 </div>
 
-
+</div>
 </body>
 </html>

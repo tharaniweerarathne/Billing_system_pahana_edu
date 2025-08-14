@@ -8,7 +8,7 @@ public final class User {
     private final String password;
     private final String role;
 
-    // Private constructor to enforce use of Builder
+
     private User(Builder builder) {
         this.id = builder.id;
         this.name = builder.name;
@@ -18,7 +18,7 @@ public final class User {
         this.role = builder.role;
     }
 
-    // Getters only (immutability enforced)
+
     public String getId() { return id; }
     public String getName() { return name; }
     public String getEmail() { return email; }
@@ -26,9 +26,7 @@ public final class User {
     public String getPassword() { return password; }
     public String getRole() { return role; }
 
-    /**
-     * Builder for User class.
-     */
+
     public static class Builder {
         private String id;
         private String name;

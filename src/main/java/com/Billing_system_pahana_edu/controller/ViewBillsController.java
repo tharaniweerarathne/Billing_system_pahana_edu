@@ -2,7 +2,6 @@ package com.Billing_system_pahana_edu.controller;
 
 import com.Billing_system_pahana_edu.command.Command;
 import com.Billing_system_pahana_edu.command.ViewBillsCommand;
-import com.Billing_system_pahana_edu.dao.BillDAO;
 import com.Billing_system_pahana_edu.service.BillService;
 
 import javax.servlet.ServletException;
@@ -11,8 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 
 @WebServlet("/viewBills")
 public class ViewBillsController extends HttpServlet {

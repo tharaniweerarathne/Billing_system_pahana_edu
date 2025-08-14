@@ -3,8 +3,7 @@ package com.Billing_system_pahana_edu.dto;
 public class UserDTO {
     private String username;
     private String password;
-
-    public UserDTO() {}
+    
 
     public UserDTO(String username, String password) {
         this.username = username;

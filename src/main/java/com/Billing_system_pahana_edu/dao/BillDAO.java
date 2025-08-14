@@ -15,7 +15,7 @@ public class BillDAO {
         try {
             conn.setAutoCommit(false);
 
-            // Insert bill
+            // insert bill
             String insertBillSql = "INSERT INTO bills (customerId, totalAmount, discount, finalAmount, billDate) VALUES (?, ?, ?, ?, NOW())";
             PreparedStatement psBill = conn.prepareStatement(insertBillSql, Statement.RETURN_GENERATED_KEYS);
             psBill.setString(1, bill.getCustomerId());
@@ -29,7 +29,7 @@ public class BillDAO {
                 generatedBillId = rs.getInt(1);
             }
 
-            // Insert bill items & reduce stock
+            // insert bill items & reduce stock
             String insertBillItemSql = "INSERT INTO bill_items (billId, itemId, unit, unitPrice, totalPrice) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement psBillItem = conn.prepareStatement(insertBillItemSql);
 
@@ -94,14 +94,14 @@ public class BillDAO {
 
             for (String[] row : resultList) {
                 if (row[0].equals(billId)) {
-                    row[3] += ", " + itemName; // Append to "Item Bought"
+                    row[3] += ", " + itemName;
                     found = true;
                     break;
                 }
             }
 
             if (!found) {
-                // Now order is: billId, accountNo, customerName, itemName(s), finalAmount, discount, billDate
+
                 resultList.add(new String[]{billId, accountNo, customerName, itemName, finalAmount, discount, billDate});
             }
         }
