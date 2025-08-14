@@ -13,7 +13,7 @@
 <head>
     <title>Admin Dashboard</title>
   <link rel="stylesheet" href="css/main.css">
-
+  <!-- Using Remix Icon for UI icons only -->
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
 
 </head>

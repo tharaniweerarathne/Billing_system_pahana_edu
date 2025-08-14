@@ -37,8 +37,9 @@
 %>
 <html>
   <head>
-    <title>Title</title>
+    <title>Create Bills</title>
     <link rel="stylesheet" href="css/Billing.css">
+    <!-- Using Remix Icon for UI icons only -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
 
   </head>

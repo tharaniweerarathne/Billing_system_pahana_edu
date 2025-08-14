@@ -8,8 +8,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Pahana Edu - Library Management System</title>
+    <title>Help Section</title>
     <link rel="stylesheet" href="css/help_section.css">
+    <!-- Using Remix Icon for UI icons only -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.css" rel="stylesheet">
 
 </head>
