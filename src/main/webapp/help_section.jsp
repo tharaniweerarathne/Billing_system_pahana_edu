@@ -310,7 +310,7 @@
             </div>
             <div class="contact-item">
                 <i class="ri-phone-line"></i>
-                <span>+011 478 6900/span></span>
+                <span>+011 478 6900</span>
             </div>
             <div class="contact-item">
                 <i class="ri-global-line"></i>
