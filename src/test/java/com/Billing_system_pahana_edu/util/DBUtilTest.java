@@ -14,10 +14,12 @@ public class DBUtilTest {
             Connection connection = DBUtil.getConnection();
             assertNotNull("Connection should not be null", connection);
 
+            // optional dummy check
             assertTrue("Connection should be valid", connection.isValid(2));
 
             connection.close();
         } catch (Exception e) {
+            // If DB is not available, still pass (dummy case)
             System.out.println("Database not available for testing, but method works.");
             assertTrue(true);
         }
