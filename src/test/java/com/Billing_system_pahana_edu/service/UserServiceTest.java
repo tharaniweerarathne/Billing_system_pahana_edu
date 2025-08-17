@@ -14,7 +14,6 @@ public class UserServiceTest {
 
     private UserService service;
 
-    // Dummy DAO for testing
     class DummyUserDAO extends UserDAO {
         private final List<User> users = new ArrayList<>();
 
