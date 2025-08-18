@@ -23,7 +23,7 @@ public class BillDAOTest {
     public void setUp() throws Exception {
         billDAO = new BillDAO();
         try (Connection conn = DBUtil.getConnection()) {
-            // Clean only test data (CUSTxxx and OTHERxxx customers)
+
             conn.createStatement().executeUpdate(
                     "DELETE FROM bill_items WHERE billId IN (SELECT billId FROM bills WHERE customerId LIKE 'CUST%' OR customerId LIKE 'OTHER%')"
             );
@@ -31,7 +31,7 @@ public class BillDAOTest {
                     "DELETE FROM bills WHERE customerId LIKE 'CUST%' OR customerId LIKE 'OTHER%'"
             );
 
-            // Reset stock only for test items
+
             conn.createStatement().executeUpdate(
                     "UPDATE items SET unit = 100 WHERE itemId IN ('ITEM1','ITEM2')"
             );
@@ -258,7 +258,7 @@ public class BillDAOTest {
     @After
     public void tearDown() throws Exception {
         try (Connection conn = DBUtil.getConnection()) {
-            // Clean only test data (CUSTxxx and OTHERxxx customers)
+
             conn.createStatement().executeUpdate(
                     "DELETE FROM bill_items WHERE billId IN (SELECT billId FROM bills WHERE customerId LIKE 'CUST%' OR customerId LIKE 'OTHER%')"
             );
@@ -266,7 +266,7 @@ public class BillDAOTest {
                     "DELETE FROM bills WHERE customerId LIKE 'CUST%' OR customerId LIKE 'OTHER%'"
             );
 
-            // Reset stock only for test items
+
             conn.createStatement().executeUpdate(
                     "UPDATE items SET unit = 100 WHERE itemId IN ('ITEM1','ITEM2')"
             );
