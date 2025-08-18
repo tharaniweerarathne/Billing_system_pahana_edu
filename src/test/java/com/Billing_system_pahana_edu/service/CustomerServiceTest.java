@@ -2,169 +2,132 @@ package com.Billing_system_pahana_edu.service;
 
 import com.Billing_system_pahana_edu.dao.CustomerDAO;
 import com.Billing_system_pahana_edu.model.Customer;
+import com.Billing_system_pahana_edu.util.DBUtil;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class CustomerServiceTest {
-    static class DummyCustomerDAO extends CustomerDAO {
-        private final List<Customer> dummyCustomers = new ArrayList<>();
+    private CustomerService service;
 
-        public DummyCustomerDAO() {
-            Customer c1 = new Customer();
-            c1.setAccountNo("C001");
-            c1.setName("Test");
-            c1.setEmail("test@example.com");
-            c1.setAddress("123 Test Street");
-            c1.setTelephone("0123456789");
-            dummyCustomers.add(c1);
+    @Before
+    public void setUp() {
+        service = new CustomerService();
+        cleanupTestData();
+    }
 
-            Customer c2 = new Customer();
-            c2.setAccountNo("C002");
-            c2.setName("Alice");
-            c2.setEmail("alice@example.com");
-            c2.setAddress("456 Alice Road");
-            c2.setTelephone("0987654321");
-            dummyCustomers.add(c2);
-        }
+    @After
+    public void tearDown() {
+        cleanupTestData();
+    }
 
-        @Override
-        public void addCustomer(Customer c) {
-            c.setAccountNo("C" + String.format("%03d", dummyCustomers.size() + 1));
-            dummyCustomers.add(c);
-        }
-
-        @Override
-        public List<Customer> getAll() {
-            return new ArrayList<>(dummyCustomers);
-        }
-
-        @Override
-        public void updateCustomer(Customer c) {
-            for (Customer cust : dummyCustomers) {
-                if (cust.getAccountNo().equals(c.getAccountNo())) {
-                    cust.setName(c.getName());
-                    cust.setEmail(c.getEmail());
-                    cust.setAddress(c.getAddress());
-                    cust.setTelephone(c.getTelephone());
-                }
-            }
-        }
-
-        @Override
-        public void deleteCustomer(String accountNo) {
-            dummyCustomers.removeIf(c -> c.getAccountNo().equals(accountNo));
-        }
-
-        @Override
-        public String getNextAccountNo() {
-            return "C" + String.format("%03d", dummyCustomers.size() + 1);
-        }
-
-        @Override
-        public List<Customer> searchCustomers(String keyword) {
-            List<Customer> result = new ArrayList<>();
-            for (Customer c : dummyCustomers) {
-                if (c.getAccountNo().contains(keyword) || c.getName().contains(keyword) ||
-                        c.getEmail().contains(keyword) || c.getAddress().contains(keyword) ||
-                        c.getTelephone().contains(keyword)) {
-                    result.add(c);
-                }
-            }
-            return result;
+    private void cleanupTestData() {
+        try (Connection conn = DBUtil.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(
+                    "DELETE FROM customers WHERE accountNo LIKE 'C9%' OR name LIKE 'TestCustomer%'"
+            );
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.err.println("Cleanup failed: " + e.getMessage());
         }
     }
 
-    // Inject dummy DAO into CustomerService
-    static class TestCustomerService extends CustomerService {
-        private final DummyCustomerDAO dummyDao = new DummyCustomerDAO();
+    private Customer createTestCustomer(String suffix) {
+        Customer c = new Customer();
+        c.setName("TestCustomer" + suffix);
+        c.setEmail("testcustomer" + suffix + "@example.com");
+        c.setAddress("123 Test Street");
+        c.setTelephone("077123456" + suffix);
+        return c;
+    }
 
-        @Override
-        public void addCustomer(Customer c) {
-            dummyDao.addCustomer(c);
-        }
-
-        @Override
-        public void updateCustomer(Customer c) {
-            dummyDao.updateCustomer(c);
-        }
-
-        @Override
-        public void deleteCustomer(String accountNo) {
-            dummyDao.deleteCustomer(accountNo);
-        }
-
-        @Override
-        public List<Customer> getAll() {
-            return dummyDao.getAll();
-        }
-
-        @Override
-        public String getNextAccountNo() {
-            return dummyDao.getNextAccountNo();
-        }
-
-        @Override
-        public List<Customer> searchCustomers(String keyword) {
-            return dummyDao.searchCustomers(keyword);
-        }
+    private String generateUniqueSuffix() {
+        return String.valueOf(System.currentTimeMillis() % 100000);
     }
 
     @Test
-    public void testAddAndGetAll() {
-        TestCustomerService service = new TestCustomerService();
-        Customer c = new Customer();
-        c.setName("Bob");
-        c.setEmail("bob@example.com");
-        c.setAddress("789 Bob Lane");
-        c.setTelephone("111222333");
+    public void testAddCustomer() {
+        String suffix = generateUniqueSuffix();
+        Customer c = createTestCustomer(suffix);
 
         service.addCustomer(c);
 
         List<Customer> all = service.getAll();
-        assertEquals(3, all.size());
-        assertEquals("Bob", all.get(2).getName());
-        assertEquals("C003", all.get(2).getAccountNo());
+        boolean found = all.stream().anyMatch(customer -> customer.getEmail().equals(c.getEmail()));
+        assertTrue("Customer should be added via service", found);
     }
 
     @Test
     public void testUpdateCustomer() {
-        TestCustomerService service = new TestCustomerService();
-        Customer c = service.getAll().get(0);
-        c.setName("Test Updated");
+        String suffix = generateUniqueSuffix();
+        Customer c = createTestCustomer(suffix);
+        service.addCustomer(c);
 
-        service.updateCustomer(c);
+        Customer added = service.getAll().stream()
+                .filter(customer -> customer.getEmail().equals(c.getEmail()))
+                .findFirst()
+                .orElse(null);
+        assertNotNull("Customer must exist before update", added);
 
-        assertEquals("Test Updated", service.getAll().get(0).getName());
+        added.setName("UpdatedName" + suffix);
+        added.setAddress("456 Updated Street");
+        added.setTelephone("07799999" + suffix);
+
+        service.updateCustomer(added);
+
+        Customer updated = service.getAll().stream()
+                .filter(customer -> customer.getAccountNo().equals(added.getAccountNo()))
+                .findFirst()
+                .orElse(null);
+
+        assertEquals("UpdatedName" + suffix, updated.getName());
+        assertEquals("456 Updated Street", updated.getAddress());
+        assertEquals("07799999" + suffix, updated.getTelephone());
     }
 
     @Test
     public void testDeleteCustomer() {
-        TestCustomerService service = new TestCustomerService();
-        service.deleteCustomer("C002");
+        String suffix = generateUniqueSuffix();
+        Customer c = createTestCustomer(suffix);
+        service.addCustomer(c);
 
-        assertEquals(1, service.getAll().size());
-        assertEquals("C001", service.getAll().get(0).getAccountNo());
+        Customer added = service.getAll().stream()
+                .filter(customer -> customer.getEmail().equals(c.getEmail()))
+                .findFirst()
+                .orElse(null);
+        assertNotNull("Customer should exist before deletion", added);
+
+        service.deleteCustomer(added.getAccountNo());
+
+        Customer deleted = service.getAll().stream()
+                .filter(customer -> customer.getAccountNo().equals(added.getAccountNo()))
+                .findFirst()
+                .orElse(null);
+        assertNull("Customer should be deleted", deleted);
     }
 
     @Test
     public void testGetNextAccountNo() {
-        TestCustomerService service = new TestCustomerService();
-        assertEquals("C003", service.getNextAccountNo());
+        String nextAccountNo = service.getNextAccountNo();
+        assertNotNull("Next account number should not be null", nextAccountNo);
+        assertTrue(nextAccountNo.startsWith("C"));
     }
 
     @Test
     public void testSearchCustomers() {
-        TestCustomerService service = new TestCustomerService();
-        List<Customer> results = service.searchCustomers("Test");
-        assertEquals(1, results.size());
-        assertEquals("C001", results.get(0).getAccountNo());
+        String suffix = generateUniqueSuffix();
+        Customer c = createTestCustomer(suffix);
+        service.addCustomer(c);
 
-        List<Customer> empty = service.searchCustomers("nonexistent");
-        assertTrue(empty.isEmpty());
+        List<Customer> results = service.searchCustomers("TestCustomer" + suffix);
+        assertNotNull("Search results should not be null", results);
+        assertTrue(results.stream().anyMatch(customer -> customer.getEmail().equals(c.getEmail())));
     }
 }

@@ -26,25 +26,7 @@ public class UserDAOTest {
     @Before
     public void setUp() {
         userDAO = new UserDAO();
-        cleanupTestData();
-    }
-
-    @After
-    public void tearDown() {
-        cleanupTestData();
-    }
-
-    private void cleanupTestData() {
-        try (Connection conn = DBUtil.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(
-                    "DELETE FROM users WHERE username LIKE 'test%' OR email LIKE 'test%' OR " +
-                            "username LIKE 'user%' OR username LIKE 'search%' OR username LIKE 'updated%' OR " +
-                            "id LIKE 'T%' OR id LIKE 'S0%'"
-            );
-            ps.executeUpdate();
-        } catch (Exception e) {
-            System.err.println("Cleanup failed: " + e.getMessage());
-        }
+        // Removed cleanupTestData()
     }
 
     private User createTestUser() {
@@ -92,9 +74,7 @@ public class UserDAOTest {
         User result = null;
         try {
             result = userDAO.login(uniqueUsername, TEST_PASSWORD);
-        } catch (Exception e) {
-            // DAO crashed, but test should still work
-        }
+        } catch (Exception ignored) {}
 
         assertNotNull("Login should return a user for valid credentials", result);
         assertEquals("Username should match", uniqueUsername, result.getUsername());
@@ -110,9 +90,7 @@ public class UserDAOTest {
         User result = null;
         try {
             result = userDAO.login("wronguser", TEST_PASSWORD);
-        } catch (Exception e) {
-            // Expected - DAO might crash
-        }
+        } catch (Exception ignored) {}
 
         assertNull("Login should return null for invalid username", result);
     }
@@ -127,9 +105,7 @@ public class UserDAOTest {
         User result = null;
         try {
             result = userDAO.login(uniqueUsername, "wrongpass");
-        } catch (Exception e) {
-            // Expected - DAO might crash
-        }
+        } catch (Exception ignored) {}
 
         assertNull("Login should return null for invalid password", result);
     }
@@ -144,9 +120,7 @@ public class UserDAOTest {
         User result = null;
         try {
             result = userDAO.login("  " + uniqueUsername + "  ", "  " + TEST_PASSWORD + "  ");
-        } catch (Exception e) {
-            // DAO might crash
-        }
+        } catch (Exception ignored) {}
 
         assertNotNull("Login should handle whitespace in credentials", result);
         assertEquals("Username should match after trimming", uniqueUsername, result.getUsername());
@@ -187,17 +161,12 @@ public class UserDAOTest {
 
         try {
             userDAO.addStaff(testUser);
-        } catch (Exception e) {
-            // DAO might crash due to duplicate or other issues
-        }
+        } catch (Exception ignored) {}
 
-        // Verify the user was added by trying to login
         User added = null;
         try {
             added = userDAO.login(uniqueUsername, TEST_PASSWORD);
-        } catch (Exception e) {
-            // Login might fail due to DAO issues
-        }
+        } catch (Exception ignored) {}
 
         if (added != null) {
             assertEquals("Role should be Staff", "Staff", added.getRole());
@@ -228,47 +197,16 @@ public class UserDAOTest {
 
         try {
             userDAO.updateStaff(updated);
-        } catch (Exception e) {
-            // DAO might crash due to constraints or other issues
-        }
+        } catch (Exception ignored) {}
 
-        // Try to verify the update
         User result = null;
         try {
             result = userDAO.login(updatedUsername, "newpass");
-        } catch (Exception e) {
-            // Login might fail
-        }
+        } catch (Exception ignored) {}
 
         if (result != null) {
             assertEquals("Name should be updated", "Updated Name", result.getName());
             assertEquals("Role should be updated", "Admin", result.getRole());
-        }
-    }
-
-    // --------------------- DELETE STAFF ---------------------
-    @Test
-    public void testDeleteStaff_ValidId_DeletesSuccessfully() {
-        String uniqueId = generateUniqueId();
-        String uniqueUsername = generateUniqueUsername();
-
-        insertTestUserDirectly(uniqueId, uniqueUsername, TEST_PASSWORD, TEST_NAME, uniqueUsername + "@example.com", TEST_ROLE);
-
-        try {
-            userDAO.deleteStaff(uniqueId);
-        } catch (Exception e) {
-            // DAO might crash
-        }
-
-        User result = null;
-        try {
-            result = userDAO.login(uniqueUsername, TEST_PASSWORD);
-        } catch (Exception e) {
-            // Login might fail
-        }
-
-        if (result == null) {
-            assertTrue("User should be deleted", true);
         }
     }
 
@@ -283,9 +221,7 @@ public class UserDAOTest {
         boolean exists = false;
         try {
             exists = userDAO.isUsernameExists(uniqueUsername);
-        } catch (Exception e) {
-            // DAO might crash
-        }
+        } catch (Exception ignored) {}
 
         assertTrue("Username should exist", exists);
     }
@@ -295,7 +231,7 @@ public class UserDAOTest {
         boolean exists = true;
         try {
             exists = userDAO.isUsernameExists("ghostuser" + System.currentTimeMillis());
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             exists = false;
         }
 

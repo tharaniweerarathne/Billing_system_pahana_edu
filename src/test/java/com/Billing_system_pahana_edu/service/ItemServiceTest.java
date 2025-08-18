@@ -2,9 +2,13 @@ package com.Billing_system_pahana_edu.service;
 
 import com.Billing_system_pahana_edu.dao.ItemDAO;
 import com.Billing_system_pahana_edu.model.Item;
+import com.Billing_system_pahana_edu.util.DBUtil;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,116 +16,128 @@ import static org.junit.Assert.*;
 
 public class ItemServiceTest {
 
-    static class DummyItemService {
-        private final List<Item> items = new ArrayList<>();
-
-        void addItem(Item item) {
-            items.add(item);
-        }
-
-        void updateItem(Item updated) {
-            for (Item item : items) {
-                if (item.getItemId().equals(updated.getItemId())) {
-                    item.setItemName(updated.getItemName());
-                    item.setCategory(updated.getCategory());
-                    item.setPrice(updated.getPrice());
-                    item.setUnit(updated.getUnit());
-                }
-            }
-        }
-
-        void deleteItem(String itemId) {
-            items.removeIf(i -> i.getItemId().equals(itemId));
-        }
-
-        List<Item> getAll() {
-            return new ArrayList<>(items);
-        }
-    }
-
-    private DummyItemService itemService;
+    private ItemService itemService;
 
     @Before
     public void setUp() {
-        itemService = new DummyItemService();
+        itemService = new ItemService();
+        cleanupTestData();
+    }
+
+    @After
+    public void tearDown() {
+        cleanupTestData();
+    }
+
+    private void cleanupTestData() {
+        try (Connection conn = DBUtil.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(
+                    "DELETE FROM items WHERE itemName LIKE 'TestItem%' OR itemName LIKE 'UpdatedItem%'"
+            );
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.err.println("Cleanup failed: " + e.getMessage());
+        }
+    }
+
+    private Item createTestItem(String suffix) {
+        Item item = new Item();
+        item.setItemName("TestItem" + suffix);
+        item.setCategory("Category" + suffix);
+        item.setPrice(100 + Integer.parseInt(suffix));
+        item.setUnit(10 + Integer.parseInt(suffix));
+        return item;
+    }
+
+    private String generateUniqueSuffix() {
+        return String.valueOf(System.currentTimeMillis() % 100000);
     }
 
     @Test
     public void testAddItem() {
-        Item item = new Item();
-        item.setItemId("I001");
-        item.setItemName("Book");
-        item.setCategory("Stationery");
-        item.setPrice(200);
-        item.setUnit(5);
+        String suffix = generateUniqueSuffix();
+        Item item = createTestItem(suffix);
 
         itemService.addItem(item);
 
-        List<Item> allItems = itemService.getAll();
-        assertEquals(1, allItems.size());
-        assertEquals("I001", allItems.get(0).getItemId());
-        assertEquals("Book", allItems.get(0).getItemName());
+        List<Item> items = itemService.getAll();
+        boolean found = items.stream().anyMatch(i -> i.getItemName().equals(item.getItemName()));
+        assertTrue("Item should be added successfully", found);
     }
 
     @Test
     public void testUpdateItem() {
-        Item item = new Item();
-        item.setItemId("I002");
-        item.setItemName("Pen");
-        item.setCategory("Stationery");
-        item.setPrice(50);
-        item.setUnit(10);
-
+        String suffix = generateUniqueSuffix();
+        Item item = createTestItem(suffix);
         itemService.addItem(item);
 
-        // Update
-        item.setItemName("Marker");
-        item.setPrice(70);
-        item.setUnit(15);
-        itemService.updateItem(item);
+        List<Item> items = itemService.searchItems("TestItem" + suffix);
+        Item added = items.stream().filter(i -> i.getItemName().equals(item.getItemName())).findFirst().orElse(null);
+        assertNotNull("Item should exist before update", added);
 
-        Item updated = itemService.getAll().get(0);
-        assertEquals("Marker", updated.getItemName());
-        assertEquals(70, updated.getPrice());
-        assertEquals(15, updated.getUnit());
+        added.setItemName("UpdatedItem" + suffix);
+        added.setCategory("UpdatedCategory" + suffix);
+        added.setPrice(999);
+        added.setUnit(99);
+        itemService.updateItem(added);
+
+        List<Item> updatedList = itemService.searchItems("UpdatedItem" + suffix);
+        Item updated = updatedList.stream().filter(i -> i.getItemName().equals("UpdatedItem" + suffix)).findFirst().orElse(null);
+
+        assertNotNull("Updated item should exist", updated);
+        assertEquals("UpdatedItem" + suffix, updated.getItemName());
+        assertEquals("UpdatedCategory" + suffix, updated.getCategory());
+        assertEquals(999, updated.getPrice());
+        assertEquals(99, updated.getUnit());
     }
 
     @Test
     public void testDeleteItem() {
-        Item item = new Item();
-        item.setItemId("I003");
-        item.setItemName("Notebook");
-        item.setCategory("Stationery");
-        item.setPrice(100);
-        item.setUnit(8);
-
+        String suffix = generateUniqueSuffix();
+        Item item = createTestItem(suffix);
         itemService.addItem(item);
-        itemService.deleteItem("I003");
 
-        List<Item> allItems = itemService.getAll();
-        assertTrue(allItems.isEmpty());
+        List<Item> items = itemService.searchItems("TestItem" + suffix);
+        Item added = items.stream().filter(i -> i.getItemName().equals(item.getItemName())).findFirst().orElse(null);
+        assertNotNull("Item should exist before deletion", added);
+
+        itemService.deleteItem(added.getItemId());
+
+        List<Item> afterDelete = itemService.searchItems("TestItem" + suffix);
+        assertTrue("Item should be deleted", afterDelete.isEmpty());
     }
 
     @Test
     public void testGetAllItems() {
-        Item item1 = new Item();
-        item1.setItemId("I004");
-        item1.setItemName("Eraser");
-        item1.setCategory("Stationery");
-        item1.setPrice(20);
-        item1.setUnit(50);
-
-        Item item2 = new Item();
-        item2.setItemId("I005");
-        item2.setItemName("Ruler");
-        item2.setCategory("Stationery");
-        item2.setPrice(30);
-        item2.setUnit(30);
+        String suffix1 = generateUniqueSuffix();
+        String suffix2 = String.valueOf((System.currentTimeMillis() + 1) % 100000);
+        Item item1 = createTestItem(suffix1);
+        Item item2 = createTestItem(suffix2);
 
         itemService.addItem(item1);
         itemService.addItem(item2);
 
         List<Item> allItems = itemService.getAll();
-        assertEquals(2, allItems.size());
+        assertTrue(allItems.size() >= 2);
+        assertTrue(allItems.stream().anyMatch(i -> i.getItemName().equals(item1.getItemName())));
+        assertTrue(allItems.stream().anyMatch(i -> i.getItemName().equals(item2.getItemName())));
+    }
+
+    @Test
+    public void testGetNextItemId() {
+        String nextId = itemService.getNextId();
+        assertNotNull("Next item ID should not be null", nextId);
+        assertTrue(nextId.startsWith("IT"));
+    }
+
+    @Test
+    public void testSearchItems() {
+        String suffix = generateUniqueSuffix();
+        Item item = createTestItem(suffix);
+        itemService.addItem(item);
+
+        List<Item> results = itemService.searchItems("TestItem" + suffix);
+        assertNotNull(results);
+        assertTrue(results.stream().anyMatch(i -> i.getItemName().equals(item.getItemName())));
     }
 }
