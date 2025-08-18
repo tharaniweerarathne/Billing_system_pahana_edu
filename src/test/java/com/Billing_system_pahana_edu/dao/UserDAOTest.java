@@ -26,7 +26,7 @@ public class UserDAOTest {
     @Before
     public void setUp() {
         userDAO = new UserDAO();
-        // Removed cleanupTestData()
+
     }
 
     private User createTestUser() {
@@ -63,7 +63,7 @@ public class UserDAOTest {
         }
     }
 
-    // --------------------- LOGIN TESTS ---------------------
+
     @Test
     public void testLogin_ValidCredentials_ReturnsUser() {
         String uniqueId = generateUniqueId();
@@ -126,7 +126,7 @@ public class UserDAOTest {
         assertEquals("Username should match after trimming", uniqueUsername, result.getUsername());
     }
 
-    // --------------------- GET ALL STAFF ---------------------
+
     @Test
     public void testGetAllStaff_ReturnsList() {
         String uniqueId = generateUniqueId();
@@ -145,7 +145,7 @@ public class UserDAOTest {
         assertTrue("Should have at least one staff member", result.size() >= 1);
     }
 
-    // --------------------- ADD STAFF ---------------------
+
     @Test
     public void testAddStaff_ValidUser_AddsSuccessfully() {
         String uniqueUsername = generateUniqueUsername();
@@ -174,7 +174,7 @@ public class UserDAOTest {
         }
     }
 
-    // --------------------- UPDATE STAFF ---------------------
+
     @Test
     public void testUpdateStaff_ValidUser_UpdatesSuccessfully() {
         String uniqueId = generateUniqueId();
@@ -210,7 +210,7 @@ public class UserDAOTest {
         }
     }
 
-    // --------------------- IS USERNAME EXISTS ---------------------
+
     @Test
     public void testIsUsernameExists_ExistingUser_ReturnsTrue() {
         String uniqueId = generateUniqueId();
@@ -238,7 +238,7 @@ public class UserDAOTest {
         assertFalse("Non-existent username should return false", exists);
     }
 
-    // --------------------- GET NEXT ID ---------------------
+
     @Test
     public void testGetNextID_ReturnsIdString() {
         String nextId = null;
@@ -252,7 +252,7 @@ public class UserDAOTest {
         assertTrue("ID should start with S", nextId.startsWith("S"));
     }
 
-    // --------------------- SEARCH STAFFS ---------------------
+
     @Test
     public void testSearchStaffs_ByKeyword_ReturnsList() {
         String uniqueId = generateUniqueId();

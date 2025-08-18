@@ -1,170 +1,320 @@
 package com.Billing_system_pahana_edu.controller;
 
 import com.Billing_system_pahana_edu.model.Item;
+import com.Billing_system_pahana_edu.util.DBUtil;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class ItemControllerTest {
-    static class DummyRequest {
-        String action;
-        String itemId;
-        String itemName;
-        String category;
-        String price;
-        String unit;
-        String query;
 
-        List<Item> itemsAttr;
-        String searchQueryAttr;
-    }
+    private ItemController controller;
+    private DummyRequest request;
+    private DummyResponse response;
+    private DummySession session;
 
-    // Simple dummy response
-    static class DummyResponse {
-        String redirectedUrl;
-        void sendRedirect(String url) { redirectedUrl = url; }
-    }
-
-    // Dummy controller using ArrayList
-    static class DummyItemController {
-        List<Item> items;
-
-        DummyItemController(List<Item> items) { this.items = items; }
-
-        void doGet(DummyRequest req) {
-            List<Item> list = new ArrayList<>();
-            if (req.query != null && !req.query.trim().isEmpty()) {
-                for (Item i : items) {
-                    if (i.getItemId().contains(req.query) || i.getItemName().contains(req.query)
-                            || i.getCategory().contains(req.query)) {
-                        list.add(i);
-                    }
-                }
-            } else {
-                list.addAll(items);
-            }
-            req.itemsAttr = list;
-            req.searchQueryAttr = req.query;
-        }
-
-        void doPost(DummyRequest req, DummyResponse res) {
-            if ("add".equals(req.action)) {
-                Item i = new Item();
-                i.setItemId("I" + String.format("%03d", items.size() + 1));
-                i.setItemName(req.itemName);
-                i.setCategory(req.category);
-                i.setPrice(Integer.parseInt(req.price));
-                i.setUnit(Integer.parseInt(req.unit));
-                items.add(i);
-
-            } else if ("update".equals(req.action)) {
-                for (Item i : items) {
-                    if (i.getItemId().equals(req.itemId)) {
-                        i.setItemName(req.itemName);
-                        i.setCategory(req.category);
-                        i.setPrice(Integer.parseInt(req.price));
-                        i.setUnit(Integer.parseInt(req.unit));
-                    }
-                }
-
-            } else if ("delete".equals(req.action)) {
-                items.removeIf(i -> i.getItemId().equals(req.itemId));
-            }
-
-            res.sendRedirect("ItemController");
-        }
-    }
-
-    private List<Item> dummyList;
-    private DummyItemController controller;
+    private final String TEST_ITEM_ID = "IT999";
 
     @Before
-    public void setup() {
-        dummyList = new ArrayList<>();
-        Item i1 = new Item();
-        i1.setItemId("I001");
-        i1.setItemName("Book");
-        i1.setCategory("Stationery");
-        i1.setPrice(200);
-        i1.setUnit(5);
+    public void setUp() throws Exception {
+        controller = new ItemController();
+        session = new DummySession();
+        request = new DummyRequest(session);
+        response = new DummyResponse();
 
-        Item i2 = new Item();
-        i2.setItemId("I002");
-        i2.setItemName("Pen");
-        i2.setCategory("Stationery");
-        i2.setPrice(50);
-        i2.setUnit(10);
+        // Insert a test item for update/delete tests
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "INSERT INTO items(itemId,itemName,category,price,unit) VALUES(?,?,?,?,?)")) {
+            ps.setString(1, TEST_ITEM_ID);
+            ps.setString(2, "TestItem");
+            ps.setString(3, "TestCategory");
+            ps.setInt(4, 100);
+            ps.setInt(5, 10);
+            ps.executeUpdate();
+        }
+    }
 
-        dummyList.add(i1);
-        dummyList.add(i2);
+    @After
+    public void tearDown() throws Exception {
+        // Remove test items from DB
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "DELETE FROM items WHERE itemId=? OR itemName LIKE 'NewTestItem%'")) {
+            ps.setString(1, TEST_ITEM_ID);
+            ps.executeUpdate();
+        }
+    }
 
-        controller = new DummyItemController(dummyList);
+
+
+    @Test
+    public void testUpdateItem() throws Exception {
+        request.setParameter("action", "update");
+        request.setParameter("itemId", TEST_ITEM_ID);
+        request.setParameter("itemName", "UpdatedItem");
+        request.setParameter("category", "UpdatedCategory");
+        request.setParameter("price", "999");
+        request.setParameter("unit", "99");
+
+        session.setAttribute("role", "Admin");
+        controller.doPost(request, response);
+
+        // Verify DB
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT * FROM items WHERE itemId=?")) {
+            ps.setString(1, TEST_ITEM_ID);
+            try (ResultSet rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                assertEquals("UpdatedItem", rs.getString("itemName"));
+                assertEquals("UpdatedCategory", rs.getString("category"));
+                assertEquals(999, rs.getInt("price"));
+                assertEquals(99, rs.getInt("unit"));
+            }
+        }
     }
 
     @Test
-    public void testDoGetAll() {
-        DummyRequest req = new DummyRequest();
-        controller.doGet(req);
-        assertEquals(2, req.itemsAttr.size());
+    public void testDeleteItem() throws Exception {
+        request.setParameter("action", "delete");
+        request.setParameter("itemId", TEST_ITEM_ID);
+
+        session.setAttribute("role", "Admin");
+        controller.doPost(request, response);
+
+        // Verify deleted
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT * FROM items WHERE itemId=?")) {
+            ps.setString(1, TEST_ITEM_ID);
+            try (ResultSet rs = ps.executeQuery()) {
+                assertFalse(rs.next());
+            }
+        }
     }
 
-    @Test
-    public void testDoGetSearch() {
-        DummyRequest req = new DummyRequest();
-        req.query = "Pen";
-        controller.doGet(req);
-        assertEquals(1, req.itemsAttr.size());
-        assertEquals("Pen", req.itemsAttr.get(0).getItemName());
+    // ======= Dummy classes =======
+
+    private static class DummyRequest implements HttpServletRequest {
+        private final Map<String, String> params = new HashMap<>();
+        private final HttpSession session;
+
+        public DummyRequest(HttpSession session) {
+            this.session = session;
+        }
+
+        public void setParameter(String key, String value) {
+            params.put(key, value);
+        }
+
+        @Override
+        public String getParameter(String name) {
+            return params.get(name);
+        }
+
+        @Override
+        public HttpSession getSession() {
+            return session;
+        }
+
+        @Override
+        public String changeSessionId() {
+            return "";
+        }
+
+        @Override
+        public HttpSession getSession(boolean create) {
+            return session;
+        }
+
+        @Override
+        public RequestDispatcher getRequestDispatcher(String path) {
+            return new RequestDispatcher() {
+                public void forward(ServletRequest req, ServletResponse res) {}
+                public void include(ServletRequest req, ServletResponse res) {}
+            };
+        }
+
+        @Override
+        public String getRealPath(String s) {
+            return "";
+        }
+
+        // Required HttpServletRequest method implementations (minimal)
+        @Override public String getAuthType() { return null; }
+        @Override public Cookie[] getCookies() { return new Cookie[0]; }
+        @Override public long getDateHeader(String name) { return -1; }
+        @Override public String getHeader(String name) { return null; }
+        @Override public Enumeration<String> getHeaders(String name) { return null; }
+        @Override public Enumeration<String> getHeaderNames() { return null; }
+        @Override public int getIntHeader(String name) { return -1; }
+        @Override public String getMethod() { return "POST"; }
+        @Override public String getPathInfo() { return null; }
+        @Override public String getPathTranslated() { return null; }
+        @Override public String getContextPath() { return ""; }
+        @Override public String getQueryString() { return null; }
+        @Override public String getRemoteUser() { return null; }
+        @Override public boolean isUserInRole(String role) { return false; }
+        @Override public java.security.Principal getUserPrincipal() { return null; }
+        @Override public String getRequestedSessionId() { return null; }
+        @Override public String getRequestURI() { return ""; }
+        @Override public StringBuffer getRequestURL() { return new StringBuffer(); }
+        @Override public String getServletPath() { return ""; }
+        @Override public boolean isRequestedSessionIdValid() { return false; }
+        @Override public boolean isRequestedSessionIdFromCookie() { return false; }
+        @Override public boolean isRequestedSessionIdFromURL() { return false; }
+        @Override public boolean isRequestedSessionIdFromUrl() { return false; }
+        @Override public boolean authenticate(HttpServletResponse response) { return false; }
+        @Override public void login(String username, String password) {}
+        @Override public void logout() {}
+        @Override public java.util.Collection<Part> getParts() { return null; }
+        @Override public Part getPart(String name) { return null; }
+        @Override public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) { return null; }
+        @Override public Object getAttribute(String name) { return null; }
+        @Override public Enumeration<String> getAttributeNames() { return null; }
+        @Override public String getCharacterEncoding() { return null; }
+        @Override public void setCharacterEncoding(String env) {}
+        @Override public int getContentLength() { return -1; }
+        @Override public long getContentLengthLong() { return -1; }
+        @Override public String getContentType() { return null; }
+        @Override public ServletInputStream getInputStream() { return null; }
+        @Override public String[] getParameterValues(String name) { return new String[]{getParameter(name)}; }
+        @Override public Enumeration<String> getParameterNames() { return java.util.Collections.enumeration(params.keySet()); }
+        @Override public Map<String, String[]> getParameterMap() {
+            Map<String, String[]> map = new HashMap<>();
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                map.put(entry.getKey(), new String[]{entry.getValue()});
+            }
+            return map;
+        }
+        @Override public String getProtocol() { return "HTTP/1.1"; }
+        @Override public String getScheme() { return "http"; }
+        @Override public String getServerName() { return "localhost"; }
+        @Override public int getServerPort() { return 8080; }
+        @Override public java.io.BufferedReader getReader() { return null; }
+        @Override public String getRemoteAddr() { return "127.0.0.1"; }
+        @Override public String getRemoteHost() { return "localhost"; }
+        @Override public void setAttribute(String name, Object o) {}
+        @Override public void removeAttribute(String name) {}
+        @Override public java.util.Locale getLocale() { return java.util.Locale.getDefault(); }
+        @Override public Enumeration<java.util.Locale> getLocales() { return null; }
+        @Override public boolean isSecure() { return false; }
+        @Override public int getRemotePort() { return 0; }
+        @Override public String getLocalName() { return "localhost"; }
+        @Override public String getLocalAddr() { return "127.0.0.1"; }
+        @Override public int getLocalPort() { return 8080; }
+        @Override public ServletContext getServletContext() { return null; }
+        @Override public AsyncContext startAsync() { return null; }
+        @Override public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) { return null; }
+        @Override public boolean isAsyncStarted() { return false; }
+        @Override public boolean isAsyncSupported() { return false; }
+        @Override public AsyncContext getAsyncContext() { return null; }
+        @Override public DispatcherType getDispatcherType() { return DispatcherType.REQUEST; }
     }
 
-    @Test
-    public void testDoPostAdd() {
-        DummyRequest req = new DummyRequest();
-        DummyResponse res = new DummyResponse();
-        req.action = "add";
-        req.itemName = "Pencil";
-        req.category = "Stationery";
-        req.price = "20";
-        req.unit = "15";
+    private static class DummyResponse implements HttpServletResponse {
+        private String redirectedUrl;
 
-        controller.doPost(req, res);
+        @Override
+        public void sendRedirect(String location) {
+            this.redirectedUrl = location;
+        }
 
-        assertEquals(3, dummyList.size());
-        assertEquals("Pencil", dummyList.get(2).getItemName());
-        assertEquals("ItemController", res.redirectedUrl);
+        public String getRedirectedUrl() {
+            return redirectedUrl;
+        }
+
+        @Override
+        public PrintWriter getWriter() {
+            return new PrintWriter(System.out);
+        }
+
+        // Required HttpServletResponse method implementations (minimal)
+        @Override public void addCookie(Cookie cookie) {}
+        @Override public boolean containsHeader(String name) { return false; }
+        @Override public String encodeURL(String url) { return url; }
+        @Override public String encodeRedirectURL(String url) { return url; }
+        @Override public String encodeUrl(String url) { return url; }
+        @Override public String encodeRedirectUrl(String url) { return url; }
+        @Override public void sendError(int sc, String msg) {}
+        @Override public void sendError(int sc) {}
+        @Override public void setDateHeader(String name, long date) {}
+        @Override public void addDateHeader(String name, long date) {}
+        @Override public void setHeader(String name, String value) {}
+        @Override public void addHeader(String name, String value) {}
+        @Override public void setIntHeader(String name, int value) {}
+        @Override public void addIntHeader(String name, int value) {}
+        @Override public void setStatus(int sc) {}
+        @Override public void setStatus(int sc, String sm) {}
+        @Override public int getStatus() { return 200; }
+        @Override public String getHeader(String name) { return null; }
+        @Override public java.util.Collection<String> getHeaders(String name) { return null; }
+        @Override public java.util.Collection<String> getHeaderNames() { return null; }
+        @Override public String getCharacterEncoding() { return "UTF-8"; }
+        @Override public String getContentType() { return null; }
+        @Override public ServletOutputStream getOutputStream() { return null; }
+        @Override public void setCharacterEncoding(String charset) {}
+        @Override public void setContentLength(int len) {}
+        @Override public void setContentLengthLong(long len) {}
+        @Override public void setContentType(String type) {}
+        @Override public void setBufferSize(int size) {}
+        @Override public int getBufferSize() { return 0; }
+        @Override public void flushBuffer() {}
+        @Override public void resetBuffer() {}
+        @Override public boolean isCommitted() { return false; }
+        @Override public void reset() {}
+        @Override public void setLocale(java.util.Locale loc) {}
+        @Override public java.util.Locale getLocale() { return java.util.Locale.getDefault(); }
     }
 
-    @Test
-    public void testDoPostUpdate() {
-        DummyRequest req = new DummyRequest();
-        DummyResponse res = new DummyResponse();
-        req.action = "update";
-        req.itemId = "I001";
-        req.itemName = "Notebook";
-        req.category = "Stationery";
-        req.price = "150";
-        req.unit = "7";
+    private static class DummySession implements HttpSession {
+        private final Map<String, Object> attributes = new HashMap<>();
 
-        controller.doPost(req, res);
-        assertEquals("Notebook", dummyList.get(0).getItemName());
-        assertEquals(150, dummyList.get(0).getPrice());
-        assertEquals("ItemController", res.redirectedUrl);
-    }
+        @Override
+        public Object getAttribute(String name) {
+            return attributes.get(name);
+        }
 
-    @Test
-    public void testDoPostDelete() {
-        DummyRequest req = new DummyRequest();
-        DummyResponse res = new DummyResponse();
-        req.action = "delete";
-        req.itemId = "I001";
+        @Override
+        public void setAttribute(String name, Object value) {
+            attributes.put(name, value);
+        }
 
-        controller.doPost(req, res);
-        assertEquals(1, dummyList.size());
-        assertEquals("Pen", dummyList.get(0).getItemName());
-        assertEquals("ItemController", res.redirectedUrl);
+        @Override
+        public void removeAttribute(String name) {
+            attributes.remove(name);
+        }
+
+        @Override
+        public Enumeration<String> getAttributeNames() {
+            return java.util.Collections.enumeration(attributes.keySet());
+        }
+
+        @Override public long getCreationTime() { return 0; }
+        @Override public String getId() { return "dummy"; }
+        @Override public long getLastAccessedTime() { return 0; }
+        @Override public ServletContext getServletContext() { return null; }
+        @Override public void setMaxInactiveInterval(int interval) {}
+        @Override public int getMaxInactiveInterval() { return 0; }
+        @Override public HttpSessionContext getSessionContext() { return null; }
+        @Override public Object getValue(String name) { return getAttribute(name); }
+        @Override public String[] getValueNames() { return attributes.keySet().toArray(new String[0]); }
+        @Override public void putValue(String name, Object value) { setAttribute(name, value); }
+        @Override public void removeValue(String name) { removeAttribute(name); }
+        @Override public void invalidate() { attributes.clear(); }
+        @Override public boolean isNew() { return false; }
     }
 }

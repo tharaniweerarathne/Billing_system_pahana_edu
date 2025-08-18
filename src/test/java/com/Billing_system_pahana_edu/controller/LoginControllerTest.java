@@ -1,173 +1,248 @@
 package com.Billing_system_pahana_edu.controller;
 
-import com.Billing_system_pahana_edu.dto.UserDTO;
-import com.Billing_system_pahana_edu.model.User;
-import com.Billing_system_pahana_edu.service.AuthService;
+import com.Billing_system_pahana_edu.util.DBUtil;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.sql.*;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
+import static org.junit.Assert.*;
 
 public class LoginControllerTest {
-    static class DummySession {
-        private final java.util.Map<String, Object> attributes = new java.util.HashMap<>();
 
-        void setAttribute(String key, Object value) {
-            attributes.put(key, value);
-        }
+    private LoginController controller;
+    private DummyRequest request;
+    private DummyResponse response;
+    private DummySession session;
 
-        Object getAttribute(String key) {
-            return attributes.get(key);
-        }
-    }
+    private final String TEST_ID = "ST001";
+    private final String TEST_USERNAME = "admin_test";
+    private final String TEST_PASSWORD = "admin123";
 
-    static class DummyRequest {
-        String username;
-        String password;
-        String error;
-        DummySession session = new DummySession();
+    @Before
+    public void setUp() throws Exception {
+        controller = new LoginController();
+        session = new DummySession();
+        request = new DummyRequest(session);
+        response = new DummyResponse();
 
-        String getParameter(String key) {
-            if ("username".equals(key)) return username;
-            if ("password".equals(key)) return password;
-            return null;
-        }
-
-        DummySession getSession() {
-            return session;
-        }
-
-        void setAttribute(String key, Object value) {
-            if ("error".equals(key)) error = (String) value;
+        // Insert test user into DB with explicit id
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "INSERT INTO users(id, username, password, role, name) VALUES(?,?,?,?,?)")) {
+            ps.setString(1, TEST_ID); // explicit id
+            ps.setString(2, TEST_USERNAME);
+            ps.setString(3, TEST_PASSWORD);
+            ps.setString(4, "Admin");
+            ps.setString(5, "Test Admin");
+            ps.executeUpdate();
         }
     }
 
-    static class DummyResponse {
-        String redirectedUrl;
-
-        void sendRedirect(String url) {
-            redirectedUrl = url;
+    @After
+    public void tearDown() throws Exception {
+        // Remove test user from DB
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "DELETE FROM users WHERE id=?")) {
+            ps.setString(1, TEST_ID);
+            ps.executeUpdate();
         }
     }
 
-    static class DummyAuthService extends AuthService {
-        private final List<User> dummyUsers = new ArrayList<>();
+    @Test
+    public void testLoginSuccessfulAdmin() throws Exception {
+        request.setParameter("username", TEST_USERNAME);
+        request.setParameter("password", TEST_PASSWORD);
 
-        {
-            dummyUsers.add(new User.Builder()
-                    .setId("S001")
-                    .setName("Test User")
-                    .setEmail("test@test.com")
-                    .setUsername("test")
-                    .setPassword("test123")
-                    .setRole("Staff")
-                    .build());
+        controller.doPost(request, response);
 
-            dummyUsers.add(new User.Builder()
-                    .setId("S002")
-                    .setName("Admin User")
-                    .setEmail("admin@test.com")
-                    .setUsername("admin")
-                    .setPassword("admin123")
-                    .setRole("Admin")
-                    .build());
+        // verify session
+        assertEquals("Admin", session.getAttribute("role"));
+        assertEquals(TEST_USERNAME, session.getAttribute("username"));
+
+        // verify redirect
+        assertEquals("dashboard_admin.jsp", response.getRedirectedUrl());
+    }
+
+    @Test
+    public void testLoginInvalidUser() throws Exception {
+        request.setParameter("username", "nonexistent");
+        request.setParameter("password", "wrongpass");
+
+        controller.doPost(request, response);
+
+        // invalid login should not set session
+        assertNull(session.getAttribute("username"));
+        assertNull(session.getAttribute("role"));
+    }
+
+    // ========== Dummy classes ==========
+
+    private static class DummyRequest extends HttpServletRequestWrapper {
+        private final Map<String, String> params = new HashMap<>();
+        private final DummySession session;
+
+        public DummyRequest(DummySession session) {
+            super(new HttpServletRequestAdapter());
+            this.session = session;
         }
 
+        public void setParameter(String key, String value) { params.put(key, value); }
+        @Override public String getParameter(String name) { return params.get(name); }
+        @Override public HttpSession getSession() { return session; }
+        @Override public HttpSession getSession(boolean create) { return session; }
         @Override
-        public User login(UserDTO dto) {
-            for (User u : dummyUsers) {
-                if (u.getUsername().equals(dto.getUsername()) && u.getPassword().equals(dto.getPassword())) {
-                    return u;
-                }
-            }
-            return null;
-        }
+        public RequestDispatcher getRequestDispatcher(String path) { return new RequestDispatcher() {
+            @Override public void forward(ServletRequest req, ServletResponse res) {}
+            @Override public void include(ServletRequest req, ServletResponse res) {}
+        }; }
     }
 
-
-    static class DummyLoginController {
-        private final AuthService service;
-
-        DummyLoginController(AuthService service) {
-            this.service = service;
-        }
-
-        void doPost(DummyRequest req, DummyResponse res) {
-            UserDTO dto = new UserDTO(req.getParameter("username"), req.getParameter("password"));
-            User user = service.login(dto);
-
-            if (user != null) {
-                DummySession session = req.getSession();
-                session.setAttribute("username", user.getUsername());
-                session.setAttribute("role", user.getRole());
-                session.setAttribute("name", user.getName());
-
-                if ("Admin".equals(user.getRole())) res.sendRedirect("dashboard_admin.jsp");
-                else if ("Staff".equals(user.getRole())) res.sendRedirect("dashboard_staff.jsp");
-                else res.sendRedirect("login.jsp");
-            } else {
-                req.setAttribute("error", "Incorrect username or password. Please try again.");
-            }
-        }
+    private static class DummyResponse extends HttpServletResponseWrapper {
+        private String redirectedUrl;
+        public DummyResponse() { super(new HttpServletResponseAdapter()); }
+        @Override public void sendRedirect(String location) { this.redirectedUrl = location; }
+        public String getRedirectedUrl() { return redirectedUrl; }
+        @Override public PrintWriter getWriter() { return new PrintWriter(System.out); }
     }
 
-
-    @Test
-    public void testLoginStaffSuccess() {
-        DummyLoginController controller = new DummyLoginController(new DummyAuthService());
-        DummyRequest req = new DummyRequest();
-        DummyResponse res = new DummyResponse();
-
-        req.username = "test";
-        req.password = "test123";
-
-        controller.doPost(req, res);
-
-        assertEquals("test", req.session.getAttribute("username"));
-        assertEquals("Staff", req.session.getAttribute("role"));
-        assertEquals("Test User", req.session.getAttribute("name"));
-        assertEquals("dashboard_staff.jsp", res.redirectedUrl);
-        assertNull(req.error);
+    private static class DummySession implements HttpSession {
+        private final Map<String, Object> attributes = new HashMap<>();
+        @Override public Object getAttribute(String name) { return attributes.get(name); }
+        @Override public void setAttribute(String name, Object value) { attributes.put(name, value); }
+        @Override public void removeAttribute(String name) { attributes.remove(name); }
+        @Override public Enumeration<String> getAttributeNames() { return Collections.enumeration(attributes.keySet()); }
+        @Override public long getCreationTime() { return 0; }
+        @Override public String getId() { return "dummy"; }
+        @Override public long getLastAccessedTime() { return 0; }
+        @Override public ServletContext getServletContext() { return null; }
+        @Override public void setMaxInactiveInterval(int interval) {}
+        @Override public int getMaxInactiveInterval() { return 0; }
+        @Override public HttpSessionContext getSessionContext() { return null; }
+        @Override public Object getValue(String name) { return getAttribute(name); }
+        @Override public String[] getValueNames() { return attributes.keySet().toArray(new String[0]); }
+        @Override public void putValue(String name, Object value) { setAttribute(name, value); }
+        @Override public void removeValue(String name) { removeAttribute(name); }
+        @Override public void invalidate() { attributes.clear(); }
+        @Override public boolean isNew() { return false; }
     }
 
-    @Test
-    public void testLoginAdminSuccess() {
-        DummyLoginController controller = new DummyLoginController(new DummyAuthService());
-        DummyRequest req = new DummyRequest();
-        DummyResponse res = new DummyResponse();
-
-        req.username = "admin";
-        req.password = "admin123";
-
-        controller.doPost(req, res);
-
-        assertEquals("admin", req.session.getAttribute("username"));
-        assertEquals("Admin", req.session.getAttribute("role"));
-        assertEquals("Admin User", req.session.getAttribute("name"));
-        assertEquals("dashboard_admin.jsp", res.redirectedUrl);
-        assertNull(req.error);
+    private static class HttpServletRequestAdapter implements HttpServletRequest {
+        public Object getAttribute(String name) { return null; }
+        public Enumeration<String> getAttributeNames() { return null; }
+        public String getCharacterEncoding() { return null; }
+        public void setCharacterEncoding(String env) {}
+        public int getContentLength() { return 0; }
+        public long getContentLengthLong() { return 0; }
+        public String getContentType() { return null; }
+        public ServletInputStream getInputStream() { return null; }
+        public String getParameter(String name) { return null; }
+        public Enumeration<String> getParameterNames() { return null; }
+        public String[] getParameterValues(String name) { return new String[0]; }
+        public Map<String, String[]> getParameterMap() { return null; }
+        public String getProtocol() { return null; }
+        public String getScheme() { return null; }
+        public String getServerName() { return null; }
+        public int getServerPort() { return 0; }
+        public BufferedReader getReader() { return null; }
+        public String getRemoteAddr() { return null; }
+        public String getRemoteHost() { return null; }
+        public void setAttribute(String name, Object o) {}
+        public void removeAttribute(String name) {}
+        public Locale getLocale() { return null; }
+        public Enumeration<Locale> getLocales() { return null; }
+        public boolean isSecure() { return false; }
+        public RequestDispatcher getRequestDispatcher(String path) { return null; }
+        public String getRealPath(String path) { return null; }
+        public int getRemotePort() { return 0; }
+        public String getLocalName() { return null; }
+        public String getLocalAddr() { return null; }
+        public int getLocalPort() { return 0; }
+        public ServletContext getServletContext() { return null; }
+        public AsyncContext startAsync() { return null; }
+        public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) { return null; }
+        public boolean isAsyncStarted() { return false; }
+        public boolean isAsyncSupported() { return false; }
+        public AsyncContext getAsyncContext() { return null; }
+        public DispatcherType getDispatcherType() { return null; }
+        public String getAuthType() { return null; }
+        public Cookie[] getCookies() { return new Cookie[0]; }
+        public long getDateHeader(String name) { return 0; }
+        public String getHeader(String name) { return null; }
+        public Enumeration<String> getHeaders(String name) { return null; }
+        public Enumeration<String> getHeaderNames() { return null; }
+        public int getIntHeader(String name) { return 0; }
+        public String getMethod() { return null; }
+        public String getPathInfo() { return null; }
+        public String getPathTranslated() { return null; }
+        public String getContextPath() { return null; }
+        public String getQueryString() { return null; }
+        public String getRemoteUser() { return null; }
+        public boolean isUserInRole(String role) { return false; }
+        public java.security.Principal getUserPrincipal() { return null; }
+        public String getRequestedSessionId() { return null; }
+        public String getRequestURI() { return null; }
+        public StringBuffer getRequestURL() { return null; }
+        public String getServletPath() { return null; }
+        public HttpSession getSession(boolean create) { return null; }
+        public HttpSession getSession() { return null; }
+        public String changeSessionId() { return null; }
+        public boolean isRequestedSessionIdValid() { return false; }
+        public boolean isRequestedSessionIdFromCookie() { return false; }
+        public boolean isRequestedSessionIdFromURL() { return false; }
+        public boolean isRequestedSessionIdFromUrl() { return false; }
+        public boolean authenticate(HttpServletResponse response) { return false; }
+        public void login(String username, String password) {}
+        public void logout() {}
+        public Collection<Part> getParts() { return null; }
+        public Part getPart(String name) { return null; }
+        public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) { return null; }
     }
 
-    @Test
-    public void testLoginFail() {
-        DummyLoginController controller = new DummyLoginController(new DummyAuthService());
-        DummyRequest req = new DummyRequest();
-        DummyResponse res = new DummyResponse();
-
-        req.username = "wrong";
-        req.password = "wrongpass";
-
-        controller.doPost(req, res);
-
-        assertNull(req.session.getAttribute("username"));
-        assertEquals("Incorrect username or password. Please try again.", req.error);
-        assertNull(res.redirectedUrl);
+    private static class HttpServletResponseAdapter implements HttpServletResponse {
+        public void addCookie(Cookie cookie) {}
+        public boolean containsHeader(String name) { return false; }
+        public String encodeURL(String url) { return null; }
+        public String encodeRedirectURL(String url) { return null; }
+        public String encodeUrl(String url) { return null; }
+        public String encodeRedirectUrl(String url) { return null; }
+        public void sendError(int sc, String msg) {}
+        public void sendError(int sc) {}
+        public void sendRedirect(String location) {}
+        public void setDateHeader(String name, long date) {}
+        public void addDateHeader(String name, long date) {}
+        public void setHeader(String name, String value) {}
+        public void addHeader(String name, String value) {}
+        public void setIntHeader(String name, int value) {}
+        public void addIntHeader(String name, int value) {}
+        public void setStatus(int sc) {}
+        public void setStatus(int sc, String sm) {}
+        public int getStatus() { return 0; }
+        public String getHeader(String name) { return null; }
+        public Collection<String> getHeaders(String name) { return null; }
+        public Collection<String> getHeaderNames() { return null; }
+        public String getCharacterEncoding() { return null; }
+        public String getContentType() { return null; }
+        public ServletOutputStream getOutputStream() { return null; }
+        public PrintWriter getWriter() { return new PrintWriter(System.out); }
+        public void setCharacterEncoding(String charset) {}
+        public void setContentLength(int len) {}
+        public void setContentLengthLong(long len) {}
+        public void setContentType(String type) {}
+        public void setBufferSize(int size) {}
+        public int getBufferSize() { return 0; }
+        public void flushBuffer() {}
+        public void resetBuffer() {}
+        public boolean isCommitted() { return false; }
+        public void reset() {}
+        public void setLocale(Locale loc) {}
+        public Locale getLocale() { return null; }
     }
-
-
 }

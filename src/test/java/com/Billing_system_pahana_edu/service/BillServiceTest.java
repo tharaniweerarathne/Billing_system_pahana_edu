@@ -21,7 +21,7 @@ public class BillServiceTest {
     public void setUp() throws Exception {
         billService = new BillService();
 
-        // Clean up test data and reset stock for test items
+
         try (Connection conn = DBUtil.getConnection()) {
             conn.createStatement().executeUpdate(
                     "DELETE FROM bill_items WHERE billId IN (SELECT billId FROM bills WHERE customerId LIKE 'TC%' OR customerId LIKE 'TO%')"
@@ -29,7 +29,7 @@ public class BillServiceTest {
             conn.createStatement().executeUpdate(
                     "DELETE FROM bills WHERE customerId LIKE 'TC%' OR customerId LIKE 'TO%'"
             );
-            // Reset stock for test items
+
             conn.createStatement().executeUpdate(
                     "UPDATE items SET unit = 100 WHERE itemId IN ('ITEM1','ITEM2','ITEM3')"
             );
@@ -100,7 +100,7 @@ public class BillServiceTest {
         BillDTO bill = new BillDTO();
         bill.setItems(new ArrayList<>());
         bill.setCustomerId("TC004");
-        bill.setDiscount(200.0); // Discount higher than total
+        bill.setDiscount(200.0);
 
         BillItem item = new BillItem.Builder()
                 .setItemId("ITEM1")
@@ -117,16 +117,16 @@ public class BillServiceTest {
     public void testProcessBillCalculatesCorrectTotals() throws Exception {
         BillDTO bill = createTestBillWithItems();
 
-        // Process the bill
+
         billService.processBill(bill);
 
-        // Verify total amount calculation (50*2 + 30*3 = 100 + 90 = 190)
+
         assertEquals("Total amount should be 190.0", 190.0, bill.getTotalAmount(), 0.01);
 
-        // Verify final amount after discount (190 - 20 = 170)
+
         assertEquals("Final amount should be 170.0", 170.0, bill.getFinalAmount(), 0.01);
 
-        // Verify item total prices are calculated
+
         assertEquals("First item total should be 100.0", 100.0, bill.getItems().get(0).getTotalPrice(), 0.01);
         assertEquals("Second item total should be 90.0", 90.0, bill.getItems().get(1).getTotalPrice(), 0.01);
     }
@@ -137,7 +137,7 @@ public class BillServiceTest {
 
         billService.processBill(bill);
 
-        // Verify calculations (100*1 = 100, 100-10 = 90)
+
         assertEquals("Total amount should be 100.0", 100.0, bill.getTotalAmount(), 0.01);
         assertEquals("Final amount should be 90.0", 90.0, bill.getFinalAmount(), 0.01);
         assertEquals("Item total should be 100.0", 100.0, bill.getItems().get(0).getTotalPrice(), 0.01);
@@ -149,7 +149,7 @@ public class BillServiceTest {
 
         billService.processBill(bill);
 
-        // Verify calculations (75*2 = 150, 150-0 = 150)
+
         assertEquals("Total amount should be 150.0", 150.0, bill.getTotalAmount(), 0.01);
         assertEquals("Final amount should be 150.0", 150.0, bill.getFinalAmount(), 0.01);
     }
@@ -160,7 +160,7 @@ public class BillServiceTest {
 
         billService.processBill(bill);
 
-        // Verify calculations (50*1 = 50, but final amount should not be negative)
+
         assertEquals("Total amount should be 50.0", 50.0, bill.getTotalAmount(), 0.01);
         assertEquals("Final amount should be 0.0 when discount exceeds total", 0.0, bill.getFinalAmount(), 0.01);
     }
@@ -183,7 +183,7 @@ public class BillServiceTest {
 
         billService.processBill(bill);
 
-        // Verify calculations (12.99*3 = 38.97, 38.97-5.75 = 33.22)
+
         assertEquals("Total amount should be 38.97", 38.97, bill.getTotalAmount(), 0.01);
         assertEquals("Final amount should be 33.22", 33.22, bill.getFinalAmount(), 0.01);
     }
@@ -197,7 +197,7 @@ public class BillServiceTest {
 
         billService.processBill(bill);
 
-        // Verify calculations with empty items
+
         assertEquals("Total amount should be 0.0", 0.0, bill.getTotalAmount(), 0.01);
         assertEquals("Final amount should be 0.0", 0.0, bill.getFinalAmount(), 0.01);
     }
@@ -212,7 +212,7 @@ public class BillServiceTest {
 
         billService.processBill(bill);
 
-        // Verify that original item properties are preserved
+
         assertEquals("Item ID should be preserved", originalItemId, bill.getItems().get(0).getItemId());
         assertEquals("Item name should be preserved", originalItemName, bill.getItems().get(0).getItemName());
         assertEquals("Unit price should be preserved", originalUnitPrice, bill.getItems().get(0).getUnitPrice(), 0.01);
@@ -222,7 +222,7 @@ public class BillServiceTest {
 
     @Test
     public void testGetSimpleBillsWithNonExistentKeyword() throws Exception {
-        // Create a test bill first
+
         BillDTO bill = createTestBillWithItems();
         billService.processBill(bill);
 
@@ -251,7 +251,7 @@ public class BillServiceTest {
 
         bill.getItems().add(invalidItem);
 
-        // This should throw an exception due to invalid item
+
         billService.processBill(bill);
 
         fail("Expected exception was not thrown for invalid item");
@@ -259,7 +259,7 @@ public class BillServiceTest {
 
     @After
     public void tearDown() throws Exception {
-        // Clean up test data
+
         try (Connection conn = DBUtil.getConnection()) {
             conn.createStatement().executeUpdate(
                     "DELETE FROM bill_items WHERE billId IN (SELECT billId FROM bills WHERE customerId LIKE 'TC%' OR customerId LIKE 'TO%')"
@@ -267,7 +267,7 @@ public class BillServiceTest {
             conn.createStatement().executeUpdate(
                     "DELETE FROM bills WHERE customerId LIKE 'TC%' OR customerId LIKE 'TO%'"
             );
-            // Reset stock for test items
+
             conn.createStatement().executeUpdate(
                     "UPDATE items SET unit = 100 WHERE itemId IN ('ITEM1','ITEM2','ITEM3')"
             );

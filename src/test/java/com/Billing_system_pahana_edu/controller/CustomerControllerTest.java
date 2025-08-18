@@ -1,170 +1,206 @@
 package com.Billing_system_pahana_edu.controller;
 
-import com.Billing_system_pahana_edu.model.Customer;
+import com.Billing_system_pahana_edu.util.DBUtil;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.*;
+import java.sql.*;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class CustomerControllerTest {
-    static class DummyRequest {
-        java.util.Map<String, String> parameters = new java.util.HashMap<>();
-        java.util.Map<String, Object> attributes = new java.util.HashMap<>();
-
-        void setParameter(String key, String value) { parameters.put(key, value); }
-        String getParameter(String key) { return parameters.get(key); }
-        void setAttribute(String key, Object value) { attributes.put(key, value); }
-        Object getAttribute(String key) { return attributes.get(key); }
-    }
-
-    static class DummyResponse {
-        String redirectedUrl;
-        void sendRedirect(String url) { redirectedUrl = url; }
-    }
-
-    static class DummyCustomerController {
-        List<Customer> customers;
-
-        DummyCustomerController(List<Customer> customers) {
-            this.customers = customers;
-        }
-
-        void doGet(DummyRequest req) {
-            String query = req.getParameter("query");
-            List<Customer> list = new ArrayList<>();
-            if (query != null && !query.trim().isEmpty()) {
-                for (Customer c : customers) {
-                    if (c.getName().contains(query) || c.getAccountNo().contains(query) ||
-                            c.getEmail().contains(query) || c.getAddress().contains(query) ||
-                            c.getTelephone().contains(query)) {
-                        list.add(c);
-                    }
-                }
-            } else {
-                list.addAll(customers);
-            }
-            req.setAttribute("list", list);
-            req.setAttribute("searchQuery", query);
-        }
-
-        void doPost(DummyRequest req, DummyResponse res) {
-            String action = req.getParameter("action");
-
-            if ("add".equals(action)) {
-                Customer c = new Customer();
-                c.setAccountNo("C" + String.format("%03d", customers.size() + 1));
-                c.setName(req.getParameter("name"));
-                c.setEmail(req.getParameter("email"));
-                c.setAddress(req.getParameter("address"));
-                c.setTelephone(req.getParameter("telephone"));
-                customers.add(c);
-            } else if ("update".equals(action)) {
-                String accountNo = req.getParameter("accountNo");
-                for (Customer c : customers) {
-                    if (c.getAccountNo().equals(accountNo)) {
-                        c.setName(req.getParameter("name"));
-                        c.setEmail(req.getParameter("email"));
-                        c.setAddress(req.getParameter("address"));
-                        c.setTelephone(req.getParameter("telephone"));
-                    }
-                }
-            } else if ("delete".equals(action)) {
-                String accountNo = req.getParameter("accountNo");
-                customers.removeIf(c -> c.getAccountNo().equals(accountNo));
-            }
-            res.sendRedirect("CustomerController");
-        }
-    }
-
-    private List<Customer> dummyList;
-    private DummyCustomerController controller;
+    private CustomerController controller;
+    private DummyRequest request;
+    private DummyResponse response;
 
     @Before
-    public void setup() {
-        dummyList = new ArrayList<>();
-        Customer c1 = new Customer();
-        c1.setAccountNo("C001");
-        c1.setName("Test");
-        c1.setEmail("test@example.com");
-        c1.setAddress("123 Test Street");
-        c1.setTelephone("0123456789");
-
-        Customer c2 = new Customer();
-        c2.setAccountNo("C002");
-        c2.setName("Alice");
-        c2.setEmail("alice@example.com");
-        c2.setAddress("456 Alice Road");
-        c2.setTelephone("0987654321");
-
-        dummyList.add(c1);
-        dummyList.add(c2);
-
-        controller = new DummyCustomerController(dummyList);
+    public void setUp() {
+        controller = new CustomerController();
+        request = new DummyRequest();
+        response = new DummyResponse();
     }
 
-    @Test
-    public void testDoGetAll() {
-        DummyRequest req = new DummyRequest();
-        controller.doGet(req);
-        List<Customer> list = (List<Customer>) req.getAttribute("list");
-        assertEquals(2, list.size());
+    // ---------- Dummy Request ----------
+    private static class DummyRequest extends HttpServletRequestWrapper {
+        private final Map<String, String> params = new HashMap<>();
+
+        public DummyRequest() { super(new HttpServletRequestAdapter()); }
+
+        public void setParameter(String key, String value) { params.put(key, value); }
+
+        @Override
+        public String getParameter(String name) { return params.get(name); }
+
+        @Override
+        public RequestDispatcher getRequestDispatcher(String path) {
+            return new RequestDispatcher() {
+                @Override public void forward(ServletRequest req, ServletResponse res) {}
+                @Override public void include(ServletRequest req, ServletResponse res) {}
+            };
+        }
     }
 
-    @Test
-    public void testDoGetSearch() {
-        DummyRequest req = new DummyRequest();
-        req.setParameter("query", "Alice");
-        controller.doGet(req);
-        List<Customer> list = (List<Customer>) req.getAttribute("list");
-        assertEquals(1, list.size());
-        assertEquals("Alice", list.get(0).getName());
+    // ---------- Dummy Response ----------
+    private static class DummyResponse extends HttpServletResponseWrapper {
+        public DummyResponse() { super(new HttpServletResponseAdapter()); }
+        @Override public PrintWriter getWriter() { return new PrintWriter(System.out); }
     }
 
-    @Test
-    public void testDoPostAdd() {
-        DummyRequest req = new DummyRequest();
-        DummyResponse res = new DummyResponse();
-        req.setParameter("action", "add");
-        req.setParameter("name", "Bob");
-        req.setParameter("email", "bob@example.com");
-        req.setParameter("address", "789 Lane");
-        req.setParameter("telephone", "111222333");
+    // ---------- Adapters ----------
+    private static class HttpServletRequestAdapter implements HttpServletRequest {
+        public Object getAttribute(String name) { return null; }
+        public Enumeration<String> getAttributeNames() { return null; }
+        public String getCharacterEncoding() { return null; }
+        public void setCharacterEncoding(String env) {}
+        public int getContentLength() { return 0; }
+        public long getContentLengthLong() { return 0; }
+        public String getContentType() { return null; }
+        public ServletInputStream getInputStream() { return null; }
+        public String getParameter(String name) { return null; }
+        public Enumeration<String> getParameterNames() { return null; }
+        public String[] getParameterValues(String name) { return new String[0]; }
+        public Map<String, String[]> getParameterMap() { return null; }
+        public String getProtocol() { return null; }
+        public String getScheme() { return null; }
+        public String getServerName() { return null; }
+        public int getServerPort() { return 0; }
+        public BufferedReader getReader() { return null; }
+        public String getRemoteAddr() { return null; }
+        public String getRemoteHost() { return null; }
+        public void setAttribute(String name, Object o) {}
+        public void removeAttribute(String name) {}
+        public Locale getLocale() { return null; }
+        public Enumeration<Locale> getLocales() { return null; }
+        public boolean isSecure() { return false; }
+        public RequestDispatcher getRequestDispatcher(String path) { return null; }
+        public String getRealPath(String path) { return null; }
+        public int getRemotePort() { return 0; }
+        public String getLocalName() { return null; }
+        public String getLocalAddr() { return null; }
+        public int getLocalPort() { return 0; }
+        public ServletContext getServletContext() { return null; }
+        public AsyncContext startAsync() { return null; }
+        public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) { return null; }
+        public boolean isAsyncStarted() { return false; }
+        public boolean isAsyncSupported() { return false; }
+        public AsyncContext getAsyncContext() { return null; }
+        public DispatcherType getDispatcherType() { return null; }
+        public String getAuthType() { return null; }
+        public Cookie[] getCookies() { return new Cookie[0]; }
+        public long getDateHeader(String name) { return 0; }
+        public String getHeader(String name) { return null; }
+        public Enumeration<String> getHeaders(String name) { return null; }
+        public Enumeration<String> getHeaderNames() { return null; }
+        public int getIntHeader(String name) { return 0; }
+        public String getMethod() { return null; }
+        public String getPathInfo() { return null; }
+        public String getPathTranslated() { return null; }
+        public String getContextPath() { return null; }
+        public String getQueryString() { return null; }
+        public String getRemoteUser() { return null; }
+        public boolean isUserInRole(String role) { return false; }
+        public java.security.Principal getUserPrincipal() { return null; }
+        public String getRequestedSessionId() { return null; }
+        public String getRequestURI() { return null; }
+        public StringBuffer getRequestURL() { return null; }
+        public String getServletPath() { return null; }
+        public HttpSession getSession(boolean create) { return null; }
+        public HttpSession getSession() { return null; }
 
-        controller.doPost(req, res);
-        assertEquals(3, dummyList.size());
-        assertEquals("Bob", dummyList.get(2).getName());
-        assertEquals("CustomerController", res.redirectedUrl);
+        @Override
+        public String changeSessionId() {
+            return "";
+        }
+
+        public boolean isRequestedSessionIdValid() { return false; }
+        public boolean isRequestedSessionIdFromCookie() { return false; }
+        public boolean isRequestedSessionIdFromURL() { return false; }
+        public boolean isRequestedSessionIdFromUrl() { return false; }
+        public boolean authenticate(HttpServletResponse response) { return false; }
+        public void login(String username, String password) {}
+        public void logout() {}
+        public Collection<Part> getParts() { return null; }
+        public Part getPart(String name) { return null; }
+        public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) { return null; }
     }
 
-    @Test
-    public void testDoPostUpdate() {
-        DummyRequest req = new DummyRequest();
-        DummyResponse res = new DummyResponse();
-        req.setParameter("action", "update");
-        req.setParameter("accountNo", "C001");
-        req.setParameter("name", "Test Updated");
-        req.setParameter("email", "updated@example.com");
-        req.setParameter("address", "New Address");
-        req.setParameter("telephone", "000111222");
-
-        controller.doPost(req, res);
-        assertEquals("Test Updated", dummyList.get(0).getName());
-        assertEquals("CustomerController", res.redirectedUrl);
+    private static class HttpServletResponseAdapter implements HttpServletResponse {
+        public void addCookie(Cookie cookie) {}
+        public boolean containsHeader(String name) { return false; }
+        public String encodeURL(String url) { return null; }
+        public String encodeRedirectURL(String url) { return null; }
+        public String encodeUrl(String url) { return null; }
+        public String encodeRedirectUrl(String url) { return null; }
+        public void sendError(int sc, String msg) {}
+        public void sendError(int sc) {}
+        public void sendRedirect(String location) {}
+        public void setDateHeader(String name, long date) {}
+        public void addDateHeader(String name, long date) {}
+        public void setHeader(String name, String value) {}
+        public void addHeader(String name, String value) {}
+        public void setIntHeader(String name, int value) {}
+        public void addIntHeader(String name, int value) {}
+        public void setStatus(int sc) {}
+        public void setStatus(int sc, String sm) {}
+        public int getStatus() { return 0; }
+        public String getHeader(String name) { return null; }
+        public Collection<String> getHeaders(String name) { return null; }
+        public Collection<String> getHeaderNames() { return null; }
+        public String getCharacterEncoding() { return null; }
+        public String getContentType() { return null; }
+        public ServletOutputStream getOutputStream() { return null; }
+        public PrintWriter getWriter() { return new PrintWriter(System.out); }
+        public void setCharacterEncoding(String charset) {}
+        public void setContentLength(int len) {}
+        public void setContentLengthLong(long len) {}
+        public void setContentType(String type) {}
+        public void setBufferSize(int size) {}
+        public int getBufferSize() { return 0; }
+        public void flushBuffer() {}
+        public void resetBuffer() {}
+        public boolean isCommitted() { return false; }
+        public void reset() {}
+        public void setLocale(Locale loc) {}
+        public Locale getLocale() { return null; }
     }
 
+    // ================== TEST ==================
     @Test
-    public void testDoPostDelete() {
-        DummyRequest req = new DummyRequest();
-        DummyResponse res = new DummyResponse();
-        req.setParameter("action", "delete");
-        req.setParameter("accountNo", "C001");
+    public void testAddCustomerThroughControllerWithDB() throws Exception {
+        String suffix = String.valueOf(System.currentTimeMillis() % 10000);
+        String email = "test" + suffix + "@example.com";
 
-        controller.doPost(req, res);
-        assertEquals(1, dummyList.size());
-        assertEquals("Alice", dummyList.get(0).getName());
-        assertEquals("CustomerController", res.redirectedUrl);
+        // set parameters
+        request.setParameter("action", "add");
+        request.setParameter("name", "TestCustomer" + suffix);
+        request.setParameter("email", email);
+        request.setParameter("address", "123 Street");
+        request.setParameter("telephone", "0771234" + suffix);
+
+        // call controller
+        controller.doPost(request, response);
+
+        // verify in DB
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT * FROM customers WHERE email=?")) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                assertTrue("Customer should exist in DB", rs.next());
+                assertEquals("Email should match", email, rs.getString("email"));
+            }
+        }
+
+        // cleanup DB
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "DELETE FROM customers WHERE email=?")) {
+            ps.setString(1, email);
+            ps.executeUpdate();
+        }
     }
 }
