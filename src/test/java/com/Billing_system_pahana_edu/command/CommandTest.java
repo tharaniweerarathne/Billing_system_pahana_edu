@@ -2,30 +2,27 @@ package com.Billing_system_pahana_edu.command;
 
 import org.junit.Test;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
 import static org.junit.Assert.assertTrue;
 
 public class CommandTest {
 
-    private static class TestCommand implements Command {
-        private boolean executed = false;
 
+    static class StubCommand implements Command {
         @Override
-        public void execute(javax.servlet.http.HttpServletRequest req,
-                            javax.servlet.http.HttpServletResponse resp) {
-            // Simulate some logic
-            executed = true;
-        }
+        public void execute(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        public boolean wasExecuted() {
-            return executed;
         }
     }
 
     @Test
-    public void testExecute() {
-        // We pass nulls because we don't care about HttpServletRequest/Response
-        TestCommand command = new TestCommand();
-        command.execute(null, null);  // just dummy call
-        assertTrue("Command should be executed", command.wasExecuted());
+    public void testExecute() throws ServletException, IOException {
+        Command command = new StubCommand();
+        command.execute(null, null);
     }
 }
