@@ -1,143 +1,155 @@
 package com.Billing_system_pahana_edu.dao;
 
 import com.Billing_system_pahana_edu.model.Item;
+import com.Billing_system_pahana_edu.util.DBUtil;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
 
 public class ItemDAOTest {
-    static class DummyItemDAO {
-        private List<Item> items = new ArrayList<>();
-
-        public void addItem(Item item) {
-            item.setItemId(getNextId());
-            items.add(item);
-        }
-
-        public List<Item> getAll() {
-            return new ArrayList<>(items);
-        }
-
-        public void updateItem(Item item) {
-            for (int i = 0; i < items.size(); i++) {
-                if (items.get(i).getItemId().equals(item.getItemId())) {
-                    items.set(i, item);
-                }
-            }
-        }
-
-        public void deleteItem(String id) {
-            items.removeIf(i -> i.getItemId().equals(id));
-        }
-
-        public String getNextId() {
-            if (items.isEmpty()) return "IT001";
-            int lastNum = Integer.parseInt(items.get(items.size() - 1).getItemId().substring(2));
-            return String.format("IT%03d", lastNum + 1);
-        }
-
-        public Item getItemById(String id) {
-            return items.stream().filter(i -> i.getItemId().equals(id)).findFirst().orElse(null);
-        }
-
-        public List<Item> searchItems(String keyword) {
-            List<Item> result = new ArrayList<>();
-            for (Item i : items) {
-                if (i.getItemId().contains(keyword) || i.getItemName().contains(keyword) || i.getCategory().contains(keyword)) {
-                    result.add(i);
-                }
-            }
-            return result;
-        }
-    }
-
-    private DummyItemDAO dao;
+    private ItemDAO itemDAO;
 
     @Before
-    public void setup() {
-        dao = new DummyItemDAO();
-
-        Item i1 = new Item();
-        i1.setItemId("IT001");
-        i1.setItemName("Pen");
-        i1.setCategory("Stationery");
-        i1.setPrice(10);
-        i1.setUnit(100);
-
-        Item i2 = new Item();
-        i2.setItemId("IT002");
-        i2.setItemName("Book");
-        i2.setCategory("Stationery");
-        i2.setPrice(200);
-        i2.setUnit(50);
-
-        dao.items.add(i1);
-        dao.items.add(i2);
+    public void setUp() {
+        itemDAO = new ItemDAO();
+        cleanupTestData();
     }
 
-    @Test
-    public void testGetAll() {
-        List<Item> list = dao.getAll();
-        assertEquals(2, list.size());
+    @After
+    public void tearDown() {
+        cleanupTestData();
     }
 
-    @Test
-    public void testAddItem() {
-        Item i3 = new Item();
-        i3.setItemName("Pencil");
-        i3.setCategory("Stationery");
-        i3.setPrice(5);
-        i3.setUnit(300);
-
-        dao.addItem(i3);
-        assertEquals(3, dao.getAll().size());
-        assertEquals("IT003", dao.getAll().get(2).getItemId());
+    private void cleanupTestData() {
+        try (Connection conn = DBUtil.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(
+                    "DELETE FROM items WHERE itemName LIKE 'TestItem%'"
+            );
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.err.println("Cleanup failed: " + e.getMessage());
+        }
     }
 
-    @Test
-    public void testUpdateItem() {
-        Item updated = new Item();
-        updated.setItemId("IT001");
-        updated.setItemName("Pen Blue");
-        updated.setCategory("Stationery");
-        updated.setPrice(15);
-        updated.setUnit(120);
-
-        dao.updateItem(updated);
-
-        Item fetched = dao.getItemById("IT001");
-        assertEquals("Pen Blue", fetched.getItemName());
-        assertEquals(15, fetched.getPrice());
+    private Item createTestItem(String suffix) {
+        Item item = new Item();
+        item.setItemName("TestItem" + suffix);
+        item.setCategory("Category" + suffix);
+        item.setPrice(100 + Integer.parseInt(suffix));
+        item.setUnit(10 + Integer.parseInt(suffix));
+        return item;
     }
 
-    @Test
-    public void testDeleteItem() {
-        dao.deleteItem("IT001");
-        assertNull(dao.getItemById("IT001"));
-        assertEquals(1, dao.getAll().size());
+    private String generateUniqueSuffix() {
+        return String.valueOf(System.currentTimeMillis() % 100000);
     }
 
+    // --------------------- ADD ITEM ---------------------
     @Test
-    public void testGetItemById() {
-        Item item = dao.getItemById("IT002");
-        assertNotNull(item);
-        assertEquals("Book", item.getItemName());
+    public void testAddItem_AddsSuccessfully() {
+        String suffix = generateUniqueSuffix();
+        Item item = createTestItem(suffix);
+
+        itemDAO.addItem(item);
+
+        List<Item> items = itemDAO.getAllItems();
+        boolean found = items.stream().anyMatch(i -> i.getItemName().equals(item.getItemName()));
+        assertTrue("Item should be added successfully", found);
     }
 
+    // --------------------- GET ALL ITEMS ---------------------
     @Test
-    public void testSearchItems() {
-        List<Item> result = dao.searchItems("Book");
-        assertEquals(1, result.size());
-        assertEquals("Book", result.get(0).getItemName());
+    public void testGetAllItems_ReturnsList() {
+        String suffix = generateUniqueSuffix();
+        Item item = createTestItem(suffix);
+        itemDAO.addItem(item);
+
+        List<Item> items = itemDAO.getAllItems();
+        assertNotNull("getAllItems should return a list", items);
+        assertTrue("List should contain at least one item", items.size() >= 1);
     }
 
+    // --------------------- UPDATE ITEM ---------------------
     @Test
-    public void testGetNextId() {
-        String next = dao.getNextId();
-        assertEquals("IT003", next);
+    public void testUpdateItem_UpdatesSuccessfully() {
+        String suffix = generateUniqueSuffix();
+        Item item = createTestItem(suffix);
+        itemDAO.addItem(item);
+
+        List<Item> items = itemDAO.searchItems("TestItem" + suffix);
+        Item added = items.stream().filter(i -> i.getItemName().equals(item.getItemName())).findFirst().orElse(null);
+        assertNotNull("Item should exist before update", added);
+
+        added.setItemName("UpdatedItem" + suffix);
+        added.setCategory("UpdatedCategory" + suffix);
+        added.setPrice(999);
+        added.setUnit(99);
+        itemDAO.updateItem(added);
+
+        Item updated = itemDAO.getItemById(added.getItemId());
+        assertEquals("Item name should be updated", "UpdatedItem" + suffix, updated.getItemName());
+        assertEquals("Category should be updated", "UpdatedCategory" + suffix, updated.getCategory());
+        assertEquals("Price should be updated", 999, updated.getPrice());
+        assertEquals("Unit should be updated", 99, updated.getUnit());
+    }
+
+    // --------------------- DELETE ITEM ---------------------
+    @Test
+    public void testDeleteItem_DeletesSuccessfully() {
+        String suffix = generateUniqueSuffix();
+        Item item = createTestItem(suffix);
+        itemDAO.addItem(item);
+
+        List<Item> items = itemDAO.searchItems("TestItem" + suffix);
+        Item added = items.stream().filter(i -> i.getItemName().equals(item.getItemName())).findFirst().orElse(null);
+        assertNotNull("Item should exist before deletion", added);
+
+        itemDAO.deleteItem(added.getItemId());
+
+        Item deleted = itemDAO.getItemById(added.getItemId());
+        assertNull("Item should be deleted", deleted);
+    }
+
+    // --------------------- GET NEXT ID ---------------------
+    @Test
+    public void testGetNextId_ReturnsNextItemId() {
+        String nextId = itemDAO.getNextId();
+        assertNotNull("getNextId should return a non-null ID", nextId);
+        assertTrue("ID should start with IT", nextId.startsWith("IT"));
+    }
+
+    // --------------------- SEARCH ITEMS ---------------------
+    @Test
+    public void testSearchItems_ReturnsList() {
+        String suffix = generateUniqueSuffix();
+        Item item = createTestItem(suffix);
+        itemDAO.addItem(item);
+
+        List<Item> results = itemDAO.searchItems("TestItem" + suffix);
+        assertNotNull("searchItems should return a list", results);
+        assertTrue("Search results should contain the item", results.stream().anyMatch(i -> i.getItemName().equals(item.getItemName())));
+    }
+
+    // --------------------- GET ITEM BY ID ---------------------
+    @Test
+    public void testGetItemById_ReturnsItem() {
+        String suffix = generateUniqueSuffix();
+        Item item = createTestItem(suffix);
+        itemDAO.addItem(item);
+
+        List<Item> items = itemDAO.searchItems("TestItem" + suffix);
+        Item added = items.stream().filter(i -> i.getItemName().equals(item.getItemName())).findFirst().orElse(null);
+        assertNotNull("Item should exist", added);
+
+        Item fetched = itemDAO.getItemById(added.getItemId());
+        assertNotNull("getItemById should return the item", fetched);
+        assertEquals("Fetched item name should match", added.getItemName(), fetched.getItemName());
     }
 }

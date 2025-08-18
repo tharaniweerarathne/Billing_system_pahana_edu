@@ -35,7 +35,7 @@ public class ViewBillsControllerTest {
         }
     }
 
-   
+
     static class DummyViewBillsCommand {
         private final DummyBillService billService;
 
