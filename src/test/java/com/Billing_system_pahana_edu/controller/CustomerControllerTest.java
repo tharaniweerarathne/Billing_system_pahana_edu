@@ -181,7 +181,7 @@ public class CustomerControllerTest {
         request.setParameter("address", "123 Street");
         request.setParameter("telephone", "0771234" + suffix);
 
-        // call controller
+        
         controller.doPost(request, response);
 
         // verify in DB
