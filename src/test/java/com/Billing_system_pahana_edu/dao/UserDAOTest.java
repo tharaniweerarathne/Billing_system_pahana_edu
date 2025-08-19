@@ -2,7 +2,6 @@ package com.Billing_system_pahana_edu.dao;
 
 import com.Billing_system_pahana_edu.model.User;
 import com.Billing_system_pahana_edu.util.DBUtil;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 

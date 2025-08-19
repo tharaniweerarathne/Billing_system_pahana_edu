@@ -32,7 +32,7 @@ public class LoginControllerTest {
         request = new DummyRequest(session);
         response = new DummyResponse();
 
-        // Insert test user into DB with explicit id
+        // inserting test user into DB
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                      "INSERT INTO users(id, username, password, role, name) VALUES(?,?,?,?,?)")) {
@@ -47,7 +47,7 @@ public class LoginControllerTest {
 
     @After
     public void tearDown() throws Exception {
-        // Remove test user from DB
+        // remove test user from DB
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                      "DELETE FROM users WHERE id=?")) {
@@ -83,7 +83,7 @@ public class LoginControllerTest {
         assertNull(session.getAttribute("role"));
     }
 
-    // ========== Dummy classes ==========
+
 
     private static class DummyRequest extends HttpServletRequestWrapper {
         private final Map<String, String> params = new HashMap<>();

@@ -24,7 +24,7 @@ public class BillControllerTest {
         response = new DummyResponse();
     }
 
-    // ---------- Dummy Request ----------
+
     private static class DummyRequest extends HttpServletRequestWrapper {
         private final Map<String, String> params = new HashMap<>();
         private final Map<String, String[]> multiParams = new HashMap<>();
@@ -57,13 +57,13 @@ public class BillControllerTest {
         }
     }
 
-    // ---------- Dummy Response ----------
+
     private static class DummyResponse extends HttpServletResponseWrapper {
         public DummyResponse() { super(new HttpServletResponseAdapter()); }
         @Override public PrintWriter getWriter() { return new PrintWriter(System.out); }
     }
 
-    // ---------- Adapters ----------
+
     private static class HttpServletRequestAdapter implements HttpServletRequest {
         public Object getAttribute(String name) { return null; }
         public Enumeration<String> getAttributeNames() { return null; }
@@ -179,16 +179,16 @@ public class BillControllerTest {
         public Locale getLocale() { return null; }
     }
 
-    // ================== TESTS ==================
+
     @Test
     public void testBillControllerGetRequest() throws Exception {
-        // Test basic GET request handling
+
         request.setParameter("showCustomers", "true");
         request.setParameter("showItems", "true");
 
         controller.doGet(request, response);
 
-        // Verify attributes are set (basic functionality test)
+
         assertNotNull("Request should complete without error", request.getAttribute("customers"));
         assertNotNull("Request should complete without error", request.getAttribute("items"));
     }
@@ -199,22 +199,22 @@ public class BillControllerTest {
         String customerId = null;
 
         try {
-            // Setup test customer
+
             customerId = createTestCustomer(suffix);
 
             // Set search parameters
             request.setParameter("customerSearch", "TestCustomer" + suffix);
 
-            // Execute GET request
+            // execute GET request
             controller.doGet(request, response);
 
-            // Verify customer search results
+            // verify customer search results
             @SuppressWarnings("unchecked")
             List<?> customers = (List<?>) request.getAttribute("customers");
             assertNotNull("Customers should not be null", customers);
 
         } finally {
-            // Cleanup
+            // cleanup
             if (customerId != null) cleanupCustomer(customerId);
         }
     }
@@ -225,22 +225,22 @@ public class BillControllerTest {
         String itemId = null;
 
         try {
-            // Setup test item
+            // setup test item
             itemId = createTestItem(suffix);
 
-            // Set search parameters
+            // set search parameters
             request.setParameter("itemSearch", "TestItem" + suffix);
 
-            // Execute GET request
+            // execute GET request
             controller.doGet(request, response);
 
-            // Verify item search results
+            // verify item search results
             @SuppressWarnings("unchecked")
             List<?> items = (List<?>) request.getAttribute("items");
             assertNotNull("Items should not be null", items);
 
         } finally {
-            // Cleanup
+            // cleanup
             if (itemId != null) cleanupItem(itemId);
         }
     }
@@ -253,43 +253,43 @@ public class BillControllerTest {
         int billId = 0;
 
         try {
-            // Setup test data
+            // setup test data
             customerId = createTestCustomer(suffix);
             itemId = createTestItem(suffix);
 
-            // Set confirm bill parameters
+            // set confirm bill parameters
             request.setParameter("action", "confirmBill");
             // FIXED: Use accountNo instead of customerId for selectedCustomer
             request.setParameter("selectedCustomer", "ACC" + suffix); // This is the accountNo we created
             request.setParameter("discount", "10.0");
 
-            // Set bill items
+            // set bill items
             request.setParameterValues("billItemId", new String[]{itemId});
             request.setParameterValues("billItemName", new String[]{"TestItem" + suffix});
             request.setParameterValues("billUnitPrice", new String[]{"50.0"});
             request.setParameterValues("billUnit", new String[]{"2"});
 
-            // Execute POST request
+            // execute POST request
             controller.doPost(request, response);
 
-            // Check if there's an error first
+
             String error = (String) request.getAttribute("error");
             if (error != null) {
                 System.err.println("Controller returned error: " + error);
             }
 
-            // Verify bill was processed (check if bill was created in DB)
+            // verify bill was processed (check if bill was created in DB)
             billId = getLastCreatedBillId();
             assertTrue("Bill should be created", billId > 0);
 
-            // Verify attributes are set for success page
+
             assertNotNull("Customer should be set", request.getAttribute("customer"));
             assertNotNull("Items should be set", request.getAttribute("items"));
             assertNotNull("Total amount should be set", request.getAttribute("totalAmount"));
             assertNotNull("Final amount should be set", request.getAttribute("finalAmount"));
 
         } finally {
-            // Cleanup
+            // cleanup
             if (billId > 0) cleanupBill(billId);
             if (customerId != null) cleanupCustomer(customerId);
             if (itemId != null) cleanupItem(itemId);
@@ -298,17 +298,17 @@ public class BillControllerTest {
 
     @Test
     public void testConfirmBillWithMissingCustomer() throws Exception {
-        // Set confirm bill parameters without customer
+        // set confirm bill parameters without customer
         request.setParameter("action", "confirmBill");
         request.setParameterValues("billItemId", new String[]{"ITEM001"});
         request.setParameterValues("billItemName", new String[]{"Test Item"});
         request.setParameterValues("billUnitPrice", new String[]{"50.0"});
         request.setParameterValues("billUnit", new String[]{"2"});
 
-        // Execute POST request
+
         controller.doPost(request, response);
 
-        // Verify error is set
+
         assertNotNull("Error should be set", request.getAttribute("error"));
         String error = (String) request.getAttribute("error");
         assertTrue("Error should mention missing customer", error.contains("Customer ID is missing"));
@@ -320,53 +320,46 @@ public class BillControllerTest {
         String customerId = null;
 
         try {
-            // Setup test customer
+            // setup test customer
             customerId = createTestCustomer(suffix);
 
-            // Set confirm bill parameters without items
+            // set confirm bill parameters without items
             request.setParameter("action", "confirmBill");
             // FIXED: Use accountNo instead of customerId
             request.setParameter("selectedCustomer", "ACC" + suffix);
 
-            // Execute POST request
+
             controller.doPost(request, response);
 
-            // Verify error is set
+            // verify error is set
             assertNotNull("Error should be set", request.getAttribute("error"));
             String error = (String) request.getAttribute("error");
             assertTrue("Error should mention no items", error.contains("No items found in bill"));
 
         } finally {
-            // Cleanup
+            // cleanup
             if (customerId != null) cleanupCustomer(customerId);
         }
     }
 
-    // ================== HELPER METHODS ==================
 
-    /**
-     * Generate a shorter suffix to avoid database column length issues
-     * @return 3-digit suffix (000-999)
-     */
+
+
     private String generateShortSuffix() {
         return String.valueOf(System.currentTimeMillis() % 1000);
     }
 
-    /**
-     * Create a test customer in the database
-     * @param suffix unique suffix for the customer
-     * @return customerId for cleanup
-     */
+
     private String createTestCustomer(String suffix) throws SQLException {
-        String customerId = "SS" + suffix; // Shortened prefix
+        String customerId = "SS" + suffix;
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                      "INSERT INTO customers (accountNo, name, email, address, telephone) VALUES (?, ?, ?, ?, ?)")) {
-            ps.setString(1, "ACC" + suffix);               // accountNo - shortened
-            ps.setString(2, "TestCustomer" + suffix);      // name
-            ps.setString(3, "test" + suffix + "@example.com"); // email
-            ps.setString(4, "123 Test Street");            // address
-            ps.setString(5, "077123" + suffix);            // telephone - shortened
+            ps.setString(1, "ACC" + suffix);
+            ps.setString(2, "TestCustomer" + suffix);
+            ps.setString(3, "test" + suffix + "@example.com");
+            ps.setString(4, "123 Test Street");
+            ps.setString(5, "077123" + suffix);
             ps.executeUpdate();
             return customerId;
         } catch (Exception e) {
@@ -374,21 +367,17 @@ public class BillControllerTest {
         }
     }
 
-    /**
-     * Create a test item in the database
-     * @param suffix unique suffix for the item
-     * @return itemId for cleanup
-     */
+
     private String createTestItem(String suffix) throws SQLException {
-        // FIXED: Much shorter itemId to avoid data truncation
-        String itemId = "IT" + suffix; // "IT" + 3 digits = max 5 characters
+
+        String itemId = "IT" + suffix;
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                      "INSERT INTO items (itemId, itemName, price, unit) VALUES (?, ?, ?, ?)")) {
             ps.setString(1, itemId);
             ps.setString(2, "TestItem" + suffix);
             ps.setDouble(3, 50.0);
-            ps.setInt(4, 100); // Stock quantity
+            ps.setInt(4, 100);
             ps.executeUpdate();
             return itemId;
         } catch (Exception e) {
@@ -396,10 +385,7 @@ public class BillControllerTest {
         }
     }
 
-    /**
-     * Get the ID of the most recently created bill
-     * @return billId or 0 if none found
-     */
+
     private int getLastCreatedBillId() throws SQLException {
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(
@@ -414,15 +400,12 @@ public class BillControllerTest {
         return 0;
     }
 
-    /**
-     * Clean up test customer from database
-     * @param customerId the customer ID returned from createTestCustomer
-     */
+
     private void cleanupCustomer(String customerId) {
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement("DELETE FROM customers WHERE accountNo = ?")) {
-            // Extract suffix from customerId and reconstruct the accountNo we inserted
-            String suffix = customerId.substring(2); // Remove "SS" prefix
+
+            String suffix = customerId.substring(2);
             String accountNo = "ACC" + suffix;
             ps.setString(1, accountNo);
             ps.executeUpdate();
@@ -433,10 +416,7 @@ public class BillControllerTest {
         }
     }
 
-    /**
-     * Clean up test item from database
-     * @param itemId the item ID returned from createTestItem
-     */
+
     private void cleanupItem(String itemId) {
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement("DELETE FROM items WHERE itemId = ?")) {
@@ -449,19 +429,16 @@ public class BillControllerTest {
         }
     }
 
-    /**
-     * Clean up test bill and its items from database
-     * @param billId the bill ID to clean up
-     */
+
     private void cleanupBill(int billId) {
         try (Connection conn = DBUtil.getConnection()) {
-            // Delete bill items first (foreign key constraint)
+
             try (PreparedStatement ps = conn.prepareStatement("DELETE FROM bill_items WHERE billId = ?")) {
                 ps.setInt(1, billId);
                 ps.executeUpdate();
             }
 
-            // Delete bill
+
             try (PreparedStatement ps = conn.prepareStatement("DELETE FROM bills WHERE billId = ?")) {
                 ps.setInt(1, billId);
                 ps.executeUpdate();

@@ -24,7 +24,7 @@ public class ViewBillsControllerTest {
         response = new DummyResponse();
     }
 
-    // ---------- Dummy Request ----------
+
     private static class DummyRequest extends HttpServletRequestWrapper {
         private final Map<String, String> params = new HashMap<>();
         private final Map<String, String[]> multiParams = new HashMap<>();
@@ -57,13 +57,13 @@ public class ViewBillsControllerTest {
         }
     }
 
-    // ---------- Dummy Response ----------
+
     private static class DummyResponse extends HttpServletResponseWrapper {
         public DummyResponse() { super(new HttpServletResponseAdapter()); }
         @Override public PrintWriter getWriter() { return new PrintWriter(System.out); }
     }
 
-    // ---------- Adapters ----------
+
     private static class HttpServletRequestAdapter implements HttpServletRequest {
         public Object getAttribute(String name) { return null; }
         public Enumeration<String> getAttributeNames() { return null; }
@@ -182,14 +182,14 @@ public class ViewBillsControllerTest {
 
     @Test
     public void testViewBillsBasicFunctionality() throws Exception {
-        // Test basic functionality without parameters
+
         try {
             controller.doGet(request, response);
 
-            // The test passes if no exception is thrown
+
             assertTrue("ViewBillsController should handle GET request without exceptions", true);
 
-            // Log what attributes were set for debugging
+
             System.out.println("Attributes set by ViewBillsController:");
             if (request.getAttribute("bills") != null) {
                 System.out.println("- bills: " + request.getAttribute("bills").getClass().getSimpleName());
@@ -208,9 +208,9 @@ public class ViewBillsControllerTest {
 
     @Test
     public void testViewBillsWithDifferentParameters() throws Exception {
-        // Test with various parameter combinations that might be supported
+
         String[][] paramCombinations = {
-                {},  // No parameters
+                {},
                 {"fromDate", "2024-01-01"},
                 {"toDate", "2024-12-31"},
                 {"customerFilter", "ACC123"},
@@ -221,10 +221,10 @@ public class ViewBillsControllerTest {
         };
 
         for (int i = 0; i < paramCombinations.length; i += 2) {
-            // Clear previous parameters
+
             request = new DummyRequest();
 
-            // Set parameters if any
+
             if (i < paramCombinations.length - 1 && paramCombinations[i].length > 0) {
                 request.setParameter(paramCombinations[i][0], paramCombinations[i + 1][0]);
             }
@@ -247,52 +247,43 @@ public class ViewBillsControllerTest {
         int billId = 0;
 
         try {
-            // Create test data
+            // create test data
             customerId = createTestCustomer(suffix);
             itemId = createTestItem(suffix);
             billId = createTestBill(suffix, customerId, itemId);
 
-            // Execute request
+
             controller.doGet(request, response);
 
-            // Try to verify bills are returned in any form
+
             Object result = request.getAttribute("bills");
             if (result == null) result = request.getAttribute("billList");
             if (result == null) result = request.getAttribute("allBills");
 
-            // If still null, that's okay - just ensure no exceptions were thrown
+
             if (result != null && result instanceof List) {
                 @SuppressWarnings("unchecked")
                 List<?> bills = (List<?>) result;
                 System.out.println("Found " + bills.size() + " bills in result");
             }
 
-            // Main test: no exceptions should be thrown
+
             assertTrue("ViewBillsController executed successfully", true);
 
         } finally {
-            // Cleanup
+            // cleanup
             if (billId > 0) cleanupBill(billId);
             if (customerId != null) cleanupCustomer(customerId);
             if (itemId != null) cleanupItem(itemId);
         }
     }
 
-    // ================== HELPER METHODS ==================
 
-    /**
-     * Generate a shorter suffix to avoid database column length issues
-     * @return 3-digit suffix (000-999)
-     */
     private String generateShortSuffix() {
         return String.valueOf(System.currentTimeMillis() % 1000);
     }
 
-    /**
-     * Create a test customer in the database
-     * @param suffix unique suffix for the customer
-     * @return customerId for cleanup
-     */
+
     private String createTestCustomer(String suffix) throws SQLException {
         String customerId = "SS" + suffix;
         try (Connection conn = DBUtil.getConnection();
@@ -310,11 +301,7 @@ public class ViewBillsControllerTest {
         }
     }
 
-    /**
-     * Create a test item in the database
-     * @param suffix unique suffix for the item
-     * @return itemId for cleanup
-     */
+
     private String createTestItem(String suffix) throws SQLException {
         String itemId = "IT" + suffix;
         try (Connection conn = DBUtil.getConnection();
@@ -331,24 +318,18 @@ public class ViewBillsControllerTest {
         }
     }
 
-    /**
-     * Create a test bill in the database
-     * @param suffix unique suffix for the bill
-     * @param customerId customer identifier
-     * @param itemId item identifier
-     * @return billId for cleanup
-     */
+
     private int createTestBill(String suffix, String customerId, String itemId) throws SQLException {
         int billId = 0;
         try (Connection conn = DBUtil.getConnection()) {
-            // Create bill - Updated to match actual schema
+            // create bill
             try (PreparedStatement ps = conn.prepareStatement(
                     "INSERT INTO bills (customerId, totalAmount, discount, finalAmount, billDate) VALUES (?, ?, ?, ?, NOW())",
                     Statement.RETURN_GENERATED_KEYS)) {
-                ps.setString(1, "ACC" + suffix); // customerId field
-                ps.setDouble(2, 100.0);          // totalAmount
-                ps.setDouble(3, 10.0);           // discount
-                ps.setDouble(4, 90.0);           // finalAmount
+                ps.setString(1, "ACC" + suffix);
+                ps.setDouble(2, 100.0);
+                ps.setDouble(3, 10.0);
+                ps.setDouble(4, 90.0);
                 ps.executeUpdate();
 
                 try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -358,15 +339,15 @@ public class ViewBillsControllerTest {
                 }
             }
 
-            // Create bill item - Updated to match actual schema
+
             if (billId > 0) {
                 try (PreparedStatement ps = conn.prepareStatement(
                         "INSERT INTO bill_items (billId, itemId, unit, unitPrice, totalPrice) VALUES (?, ?, ?, ?, ?)")) {
-                    ps.setInt(1, billId);        // billId
-                    ps.setString(2, itemId);     // itemId
-                    ps.setInt(3, 2);             // unit (quantity)
-                    ps.setDouble(4, 50.0);       // unitPrice
-                    ps.setDouble(5, 100.0);      // totalPrice
+                    ps.setInt(1, billId);
+                    ps.setString(2, itemId);
+                    ps.setInt(3, 2);
+                    ps.setDouble(4, 50.0);
+                    ps.setDouble(5, 100.0);
                     ps.executeUpdate();
                 }
             }
@@ -377,10 +358,7 @@ public class ViewBillsControllerTest {
         }
     }
 
-    /**
-     * Clean up test customer from database
-     * @param customerId the customer ID returned from createTestCustomer
-     */
+
     private void cleanupCustomer(String customerId) {
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement("DELETE FROM customers WHERE accountNo = ?")) {
@@ -395,10 +373,7 @@ public class ViewBillsControllerTest {
         }
     }
 
-    /**
-     * Clean up test item from database
-     * @param itemId the item ID returned from createTestItem
-     */
+
     private void cleanupItem(String itemId) {
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement("DELETE FROM items WHERE itemId = ?")) {
@@ -411,19 +386,16 @@ public class ViewBillsControllerTest {
         }
     }
 
-    /**
-     * Clean up test bill and its items from database
-     * @param billId the bill ID to clean up
-     */
+
     private void cleanupBill(int billId) {
         try (Connection conn = DBUtil.getConnection()) {
-            // Delete bill items first (foreign key constraint)
+
             try (PreparedStatement ps = conn.prepareStatement("DELETE FROM bill_items WHERE billId = ?")) {
                 ps.setInt(1, billId);
                 ps.executeUpdate();
             }
 
-            // Delete bill
+            // delete bill
             try (PreparedStatement ps = conn.prepareStatement("DELETE FROM bills WHERE billId = ?")) {
                 ps.setInt(1, billId);
                 ps.executeUpdate();

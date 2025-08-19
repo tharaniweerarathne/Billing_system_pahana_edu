@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertTrue;
+
 
 public class CommandTest {
 

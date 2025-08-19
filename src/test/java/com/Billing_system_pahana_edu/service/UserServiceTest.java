@@ -82,7 +82,7 @@ public class UserServiceTest {
     public void setup() throws Exception {
         service = new UserService();
 
-        // Inject dummy DAO into private final field using reflection
+
         java.lang.reflect.Field daoField = UserService.class.getDeclaredField("dao");
         daoField.setAccessible(true);
         daoField.set(service, new DummyUserDAO());

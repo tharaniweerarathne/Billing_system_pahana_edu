@@ -24,7 +24,7 @@ public class CustomerControllerTest {
         response = new DummyResponse();
     }
 
-    // ---------- Dummy Request ----------
+
     private static class DummyRequest extends HttpServletRequestWrapper {
         private final Map<String, String> params = new HashMap<>();
 
@@ -44,13 +44,13 @@ public class CustomerControllerTest {
         }
     }
 
-    // ---------- Dummy Response ----------
+
     private static class DummyResponse extends HttpServletResponseWrapper {
         public DummyResponse() { super(new HttpServletResponseAdapter()); }
         @Override public PrintWriter getWriter() { return new PrintWriter(System.out); }
     }
 
-    // ---------- Adapters ----------
+
     private static class HttpServletRequestAdapter implements HttpServletRequest {
         public Object getAttribute(String name) { return null; }
         public Enumeration<String> getAttributeNames() { return null; }
@@ -168,7 +168,7 @@ public class CustomerControllerTest {
         public Locale getLocale() { return null; }
     }
 
-    // ================== TEST ==================
+
     @Test
     public void testAddCustomerThroughControllerWithDB() throws Exception {
         String suffix = String.valueOf(System.currentTimeMillis() % 10000);

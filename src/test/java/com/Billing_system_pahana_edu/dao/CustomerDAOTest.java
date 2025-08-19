@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
+
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -55,7 +55,7 @@ public class CustomerDAOTest {
         return String.valueOf(System.currentTimeMillis() % 100000);
     }
 
-    // --------------------- ADD CUSTOMER ---------------------
+
     @Test
     public void testAddCustomer_AddsSuccessfully() {
         String suffix = generateUniqueSuffix();
@@ -68,7 +68,7 @@ public class CustomerDAOTest {
         assertTrue("Customer should be added successfully", found);
     }
 
-    // --------------------- GET ALL CUSTOMERS ---------------------
+
     @Test
     public void testGetAll_ReturnsList() {
         String suffix = generateUniqueSuffix();
@@ -80,7 +80,7 @@ public class CustomerDAOTest {
         assertTrue("List should contain at least one customer", customers.size() >= 1);
     }
 
-    // --------------------- UPDATE CUSTOMER ---------------------
+
     @Test
     public void testUpdateCustomer_UpdatesSuccessfully() {
         String suffix = generateUniqueSuffix();
@@ -102,7 +102,7 @@ public class CustomerDAOTest {
         assertEquals("Telephone should be updated", "07799999" + suffix, updated.getTelephone());
     }
 
-    // --------------------- DELETE CUSTOMER ---------------------
+
     @Test
     public void testDeleteCustomer_DeletesSuccessfully() {
         String suffix = generateUniqueSuffix();
@@ -119,7 +119,7 @@ public class CustomerDAOTest {
         assertNull("Customer should be deleted", deleted);
     }
 
-    // --------------------- GET NEXT ACCOUNT NO ---------------------
+
     @Test
     public void testGetNextAccountNo_ReturnsNextAccountNumber() {
         String nextAccountNo = customerDAO.getNextAccountNo();
@@ -127,7 +127,7 @@ public class CustomerDAOTest {
         assertTrue("Account number should start with C", nextAccountNo.startsWith("C"));
     }
 
-    // --------------------- SEARCH CUSTOMERS ---------------------
+
     @Test
     public void testSearchCustomers_ReturnsList() {
         String suffix = generateUniqueSuffix();
@@ -139,7 +139,7 @@ public class CustomerDAOTest {
         assertTrue("Search results should contain the customer", results.stream().anyMatch(customer -> customer.getEmail().equals(c.getEmail())));
     }
 
-    // --------------------- GET CUSTOMER BY ACCOUNT NO ---------------------
+
     @Test
     public void testGetCustomerByAccountNo_ReturnsCustomer() {
         String suffix = generateUniqueSuffix();

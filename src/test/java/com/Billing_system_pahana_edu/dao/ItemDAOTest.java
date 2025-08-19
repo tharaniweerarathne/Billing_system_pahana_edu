@@ -51,7 +51,7 @@ public class ItemDAOTest {
         return String.valueOf(System.currentTimeMillis() % 100000);
     }
 
-    // --------------------- ADD ITEM ---------------------
+
     @Test
     public void testAddItem_AddsSuccessfully() {
         String suffix = generateUniqueSuffix();
@@ -64,7 +64,7 @@ public class ItemDAOTest {
         assertTrue("Item should be added successfully", found);
     }
 
-    // --------------------- GET ALL ITEMS ---------------------
+
     @Test
     public void testGetAllItems_ReturnsList() {
         String suffix = generateUniqueSuffix();
@@ -76,7 +76,7 @@ public class ItemDAOTest {
         assertTrue("List should contain at least one item", items.size() >= 1);
     }
 
-    // --------------------- UPDATE ITEM ---------------------
+
     @Test
     public void testUpdateItem_UpdatesSuccessfully() {
         String suffix = generateUniqueSuffix();
@@ -100,7 +100,7 @@ public class ItemDAOTest {
         assertEquals("Unit should be updated", 99, updated.getUnit());
     }
 
-    // --------------------- DELETE ITEM ---------------------
+
     @Test
     public void testDeleteItem_DeletesSuccessfully() {
         String suffix = generateUniqueSuffix();
@@ -117,7 +117,7 @@ public class ItemDAOTest {
         assertNull("Item should be deleted", deleted);
     }
 
-    // --------------------- GET NEXT ID ---------------------
+
     @Test
     public void testGetNextId_ReturnsNextItemId() {
         String nextId = itemDAO.getNextId();
@@ -125,7 +125,7 @@ public class ItemDAOTest {
         assertTrue("ID should start with IT", nextId.startsWith("IT"));
     }
 
-    // --------------------- SEARCH ITEMS ---------------------
+
     @Test
     public void testSearchItems_ReturnsList() {
         String suffix = generateUniqueSuffix();
@@ -137,7 +137,7 @@ public class ItemDAOTest {
         assertTrue("Search results should contain the item", results.stream().anyMatch(i -> i.getItemName().equals(item.getItemName())));
     }
 
-    // --------------------- GET ITEM BY ID ---------------------
+
     @Test
     public void testGetItemById_ReturnsItem() {
         String suffix = generateUniqueSuffix();

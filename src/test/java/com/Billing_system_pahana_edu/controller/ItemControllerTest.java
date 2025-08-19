@@ -1,6 +1,5 @@
 package com.Billing_system_pahana_edu.controller;
 
-import com.Billing_system_pahana_edu.model.Item;
 import com.Billing_system_pahana_edu.util.DBUtil;
 import org.junit.After;
 import org.junit.Before;
@@ -34,7 +33,7 @@ public class ItemControllerTest {
         request = new DummyRequest(session);
         response = new DummyResponse();
 
-        // Insert a test item for update/delete tests
+
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                      "INSERT INTO items(itemId,itemName,category,price,unit) VALUES(?,?,?,?,?)")) {
@@ -49,7 +48,7 @@ public class ItemControllerTest {
 
     @After
     public void tearDown() throws Exception {
-        // Remove test items from DB
+
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                      "DELETE FROM items WHERE itemId=? OR itemName LIKE 'NewTestItem%'")) {
@@ -72,7 +71,7 @@ public class ItemControllerTest {
         session.setAttribute("role", "Admin");
         controller.doPost(request, response);
 
-        // Verify DB
+
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                      "SELECT * FROM items WHERE itemId=?")) {
@@ -95,7 +94,7 @@ public class ItemControllerTest {
         session.setAttribute("role", "Admin");
         controller.doPost(request, response);
 
-        // Verify deleted
+
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                      "SELECT * FROM items WHERE itemId=?")) {
@@ -106,7 +105,7 @@ public class ItemControllerTest {
         }
     }
 
-    // ======= Dummy classes =======
+
 
     private static class DummyRequest implements HttpServletRequest {
         private final Map<String, String> params = new HashMap<>();
@@ -153,7 +152,7 @@ public class ItemControllerTest {
             return "";
         }
 
-        // Required HttpServletRequest method implementations (minimal)
+
         @Override public String getAuthType() { return null; }
         @Override public Cookie[] getCookies() { return new Cookie[0]; }
         @Override public long getDateHeader(String name) { return -1; }
@@ -242,7 +241,7 @@ public class ItemControllerTest {
             return new PrintWriter(System.out);
         }
 
-        // Required HttpServletResponse method implementations (minimal)
+
         @Override public void addCookie(Cookie cookie) {}
         @Override public boolean containsHeader(String name) { return false; }
         @Override public String encodeURL(String url) { return url; }
