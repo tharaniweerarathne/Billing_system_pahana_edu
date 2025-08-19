@@ -1,6 +1,6 @@
 package com.Billing_system_pahana_edu.service;
 
-import com.Billing_system_pahana_edu.dao.UserDAO;
+
 import com.Billing_system_pahana_edu.dto.UserDTO;
 import com.Billing_system_pahana_edu.model.User;
 import com.Billing_system_pahana_edu.util.DBUtil;
@@ -8,11 +8,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import static org.junit.Assert.*;
