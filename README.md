@@ -163,6 +163,17 @@ INSERT INTO users (id, name, email, username, password, role)
 VALUES ('S001', 'Admin User', 'admin@example.com', 'admin', 'admin123', 'Admin');
 ```
 
+```xml
+<dependency>
+  <groupId>javax.servlet</groupId>
+  <artifactId>javax.servlet-api</artifactId>
+  <version>4.0.1</version>
+  <scope>provided</scope>
+</dependency>
+```
+
+
+
 
 
 
