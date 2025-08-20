@@ -1,4 +1,6 @@
-<h1 align="center">📚 Pahana Edu Billing System</h1>
+<h1 align="center">
+  <img src="https://img.icons8.com/fluency/96/000000/books.png" alt="Logo" width="60" height="60"/>Pahana Edu Billing System</h1>
+
 <h3 align="center">💻 A Web-Based Billing & Customer Management System</h3>
 
 <p align="center">
@@ -31,13 +33,18 @@ The system ensures:
 
 ---
 
-### ✨ Core Functionalities
-- 🔑 *User Authentication* – Secure login system that validates username and password, with **role-based access** for Admin and Staff users.
-- 👥 *Staff Management (Admin Only)* – Add, edit, view,search, and manage staff accounts 
-- 👥 *Customer Management* – Add, edit, view ,search, and manage customer accounts 
-- 📦 *Item Management (Admin Only)* – Add, edit, view ,search, and manage iventory  
-- 🧾 *Billing System* – Calculate and print bills based on units consumed  
-- 📘 *Help Section* – Usage guidelines for users  
+## 🚀 Core Functionalities
+
+| Module | Features | Access Level |
+|--------|----------|-------------|
+| **🔐 Authentication** | Secure login with session management, role validation | Admin & Staff|
+| **👥 Staff Management** | Add, edit, view, search staff accounts | Admin Only |
+| **👨‍💼 Customer Management** | Add, edit, view, search customer accounts | Admin & Staff |
+| **📦 Item Management** | Add, edit, view, search inventory items | Admin Only |
+| **🧾 Billing System** | Generate invoices, calculate totals, apply discounts | Admin & Staff |
+| **❓ Help Section** | User guides and system documentation | All Users |
+
+---
 
 
 ### Additional Features
@@ -61,14 +68,17 @@ The system ensures:
 ---
 
 
-### 📝 Prerequisites
-Before setting up the project, ensure you have the following installed:  
-- *Java Development Kit (JDK)* – Version 17 or higher  
-- *IntelliJ IDEA Ultimate* – Latest version  
-- *WAMP Server* – Latest version (includes MySQL, PHP)  
-- *Apache Tomcat* – Version 9
-- *Git* – Latest version  
-- *Web Browser* – Chrome, Firefox, or Edge  
+## 📋 Prerequisites
+
+Ensure the following are installed on your system:
+
+- **Java Development Kit (JDK)** - Version 17 or higher
+- **IntelliJ IDEA Ultimate** - Latest version recommended
+- **WAMP Server** - Includes Apache, MySQL, and PHP
+- **Apache Tomcat** - Version 9.x
+- **Git** - Latest version
+- **Web Browser** - Chrome, Firefox, or Edge (latest versions)
+
 
 ---
 
