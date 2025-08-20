@@ -32,7 +32,7 @@ The system ensures:
 ---
 
 ### ✨ Core Functionalities
-- 🔑 *User Authentication* – Secure login system with username/password validation
+- 🔑 *User Authentication* – Secure login system that validates username and password, with **role-based access** for Admin and Staff users.
 - 👥 *Staff Management (Admin Only)* – Add, edit, view,search, and manage staff accounts 
 - 👥 *Customer Management* – Add, edit, view ,search, and manage customer accounts 
 - 📦 *Item Management (Admin Only)* – Add, edit, view ,search, and manage iventory  
@@ -163,22 +163,27 @@ INSERT INTO users (id, name, email, username, password, role)
 VALUES ('S001', 'Admin User', 'admin@example.com', 'admin', 'admin123', 'Admin');
 ```
 
-```xml
-<dependency>
-  <groupId>javax.servlet</groupId>
-  <artifactId>javax.servlet-api</artifactId>
-  <version>4.0.1</version>
-  <scope>provided</scope>
-</dependency>
-```
+---
+### 🛠️ Troubleshooting
 
+**Common Issues**
 
+1. **Database Connection Failed**  
+   - Make sure WAMP Server is running.  
+   - Check database credentials in the project configuration.
 
+2. **Port Already in Use**  
+   - Change Tomcat server port in configuration.  
+   - Identify and stop any programs currently using the same port.  
 
+3. **Build Failures**  
+   - Clean and rebuild the project in IntelliJ IDEA.  
+   - Check that all Maven dependencies are installed correctly.
+  
+---
+### 📦 Maven Dependencies
 
-
-
-
-
-
+- `javax.servlet-api:4.0.1` → Servlet support (provided by Tomcat)  
+- `mysql-connector-java:8.0.33` → MySQL JDBC driver  
+- `junit:4.13.2` → For unit testing
    
