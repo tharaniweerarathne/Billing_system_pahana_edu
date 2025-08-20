@@ -1,6 +1,8 @@
 <h1 align="center">
   <img src="https://img.icons8.com/fluency/96/000000/books.png" alt="Logo" width="60" height="60"/>Pahana Edu Billing System</h1>
 
+<p align="center">Version: <strong>v1.0</strong></p>
+
 <h3 align="center">💻 A Web-Based Billing & Customer Management System</h3>
 
 <p align="center">
