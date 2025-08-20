@@ -91,11 +91,11 @@ Ensure the following are installed on your system:
    git clone https://github.com/your-username/pahana-edu-billing-system.git
 
 ### ⚙ DB Setup
-01. *Start WAMP Server*
+2. *Start WAMP Server*
 <li>Launch WAMP Server</li>
 <li>Ensure all services (Apache, MySQL) are running (green icon)</li>
 
-02. *Create the Database*
+3. *Create the Database*
 <li>Open phpMyAdmin at: http://localhost/phpmyadmin</li>
 <li>Launch WAMP Server</li>
 <li>Run the following SQL commands:</li>
@@ -105,7 +105,7 @@ CREATE DATABASE pahanaedu_db;
 USE pahanaedu_db;
 ```
 
-03. *Create Tables*
+4. *Create Tables*
    
 ```sql
 -- Users Table
