@@ -88,7 +88,7 @@ Ensure the following are installed on your system:
 
 1. *Clone the Repository*
    ```bash
-   git clone https://github.com/your-username/pahana-edu-billing-system.git
+   https://github.com/tharaniweerarathne/Billing_system_pahana_edu.git
 
 ### ⚙ DB Setup
 2. *Start WAMP Server*
